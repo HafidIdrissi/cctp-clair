@@ -1,0 +1,51 @@
+{
+  "name": "CCTP Clair · essai local",
+  "nodes": [
+    {
+      "id": "93c4a532-65ef-4ec2-9a1a-f82997c26351",
+      "name": "Démarrer le test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c7e91553-33ff-492e-9d8e-940eef40c698",
+      "name": "Analyser le PDF fictif",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8789/jobs",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"demo\":true}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Démarrer le test": {
+      "main": [
+        [
+          {
+            "node": "Analyser le PDF fictif",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

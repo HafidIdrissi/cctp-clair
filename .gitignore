@@ -1,0 +1,9 @@
+.venv/
+local/
+__pycache__/
+*.pyc
+RAG_RER_V/dila/.local/
+output/
+webapp/.local/
+.env*
+RAG_RER_V/dila/downloads/

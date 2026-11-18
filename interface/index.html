@@ -1,0 +1,8 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CCTP Clair</title><link rel="stylesheet" href="/style.css"><script defer src="/app.js"></script></head>
+<body><header><strong>CCTP Clair</strong><button id="guide">Me guider</button></header><main>
+<h1>Vérifier un document</h1><p>Comparez les clauses de votre projet aux textes disponibles sur cet ordinateur.</p>
+<section id="example"><h2>Premier essai</h2><p>Testez un cheminement piéton fictif avec trois articles de la base LEGI. <a href="/exemple.pdf" target="_blank">Voir le document</a></p><button id="demo">Tester avec l’exemple</button></section>
+<form id="form"><h2>Votre document</h2><label>Fichier PDF ou image<input type="file" id="file" accept=".pdf,.jpg,.png,.jpeg" required></label><label>Lieu ou contexte du projet<input id="city" required minlength="2" maxlength="300" placeholder="Ex. cheminement piéton à Rennes"></label><label>Date des règles à examiner<input type="date" id="date" required></label><details><summary>Choisir le modèle local</summary><label>Comparaison juridique<select id="model"><option>ministral-3:3b</option></select></label></details><button>Lancer l’analyse</button></form>
+<p id="feedback" role="status"></p><section id="reports"><h2>Mes rapports</h2><div id="list">Chargement…</div></section>
+<p class="note">Le corpus fourni couvre trois articles de voirie et d’accessibilité. Une conclusion porte uniquement sur le critère examiné.</p></main>
+<aside id="coach" aria-label="Guide de prise en main" hidden><strong id="step"></strong><p id="hint"></p><button id="next">Suivant</button><button id="close">Fermer</button></aside></body></html>
