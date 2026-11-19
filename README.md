@@ -7,7 +7,7 @@ CCTP Clair lit un cahier des clauses techniques particulières sur votre PC et r
 - **Première utilisation sur Windows ?** [Téléchargez CCTP Clair](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip), faites un clic droit sur le ZIP → **Extraire tout**, puis ouvrez le dossier extrait et double-cliquez sur **Lancer CCTP Clair.cmd**.
 - **CCTP Clair est déjà lancé sur ce PC ?** [Ouvrez l’interface locale](http://127.0.0.1:8789/) et cliquez sur **Tester avec l’exemple**. Le PDF, le lieu et la date sont déjà renseignés. Dans **Mes rapports**, cliquez sur **Lire le rapport** dès que **Rapport prêt** apparaît.
 
-[Voir le démarrage en images](guide/premier-essai.gif) · [Changer de modèle Ollama](#changer-de-modèle-ollama)
+[Voir le démarrage en images](guide/premier-essai.gif) · [Tester depuis n8n](#tester-depuis-n8n) · [Changer de modèle Ollama](#changer-de-modèle-ollama)
 
 ## Ouvrir CCTP Clair sur Windows
 
@@ -73,9 +73,17 @@ L’édition portable livre **trois XML officiels** extraits du stock LEGI du 13
 
 Les fichiers soumis, les requêtes du modèle et les rapports sont conservés dans le dossier local/ de votre installation, y compris le document soumis sous forme encodée. Un lien Légifrance ouvre le site officiel dans votre navigateur.
 
-## Utilisation avec n8n (facultatif)
+## Tester depuis n8n
 
-Le double-clic démarre le moteur directement. Pour le déclencher depuis **n8n installé sur le même Windows**, ouvrez un workflow vide, choisissez **Import from File** dans le menu du workflow, puis sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json). Cliquez sur **Execute workflow**. Le dernier nœud lance la même analyse et renvoie le lien de suivi du rapport. Le service écoute sur la boucle locale du PC. Ce workflow vise une instance n8n native sur ce PC.
+n8n permet de déclencher le même essai que le bouton **Tester avec l’exemple**. Le workflow fourni comporte deux blocs, appelés *nœuds*. **Démarrer le test** attend votre clic. **Analyser le PDF fictif** demande à CCTP Clair d’analyser le PDF fourni avec les règles du 1er juillet 2024. CCTP Clair lit le document, recherche les articles et prépare le rapport sur votre PC.
+
+1. **Ouvrez CCTP Clair.** Double-cliquez sur **Lancer CCTP Clair.cmd** et gardez la fenêtre ouverte. Attendez que [l’interface CCTP Clair](http://127.0.0.1:8789/) s’affiche.
+2. **Ouvrez n8n sur le même PC Windows.** Si votre installation locale est déjà démarrée, [ouvrez l’éditeur n8n](http://localhost:5678/). Si vous avez installé n8n globalement avec npm, vous pouvez le démarrer en saisissant `n8n start` dans un terminal. Le raccourci utilise le port par défaut, 5678. [Installation locale de n8n](https://docs.n8n.io/hosting/installation/npm/)
+3. **Importez le workflow une première fois.** Dans n8n, créez un workflow vide. En haut à droite, cliquez sur **⋯ → Import from File**. Dans le dossier ZIP déjà extrait, ouvrez le sous-dossier **n8n** et choisissez **Tester CCTP Clair.json**. Les deux nœuds apparaissent, reliés par une flèche. [Voir le workflow fourni](n8n/Tester%20CCTP%20Clair.json)
+4. **Lancez le test.** Cliquez sur **Execute workflow**. Une fois le second nœud vert, ouvrez **Analyser le PDF fictif**. Dans **Output**, copiez la valeur du champ `url` et ouvrez-la dans votre navigateur. Le vert indique que CCTP Clair a accepté la demande. L’analyse peut encore être en cours.
+5. **Lisez le résultat.** Le lien vous amène à l’analyse dans **Mes rapports**. Quand **Rapport prêt** apparaît, cliquez sur **Lire le rapport** ou **Télécharger le PDF**.
+
+**Si n8n indique « connexion refusée »**, ouvrez d’abord [CCTP Clair sur ce PC](http://127.0.0.1:8789/). Si la page est inaccessible, redémarrez le lanceur et attendez son ouverture avant de réexécuter le workflow. Ce workflow utilise l’adresse locale `127.0.0.1` depuis n8n. Il est prévu pour n8n exécuté directement sur le même Windows. Dans Docker ou n8n Cloud, cette adresse désigne l’environnement qui héberge n8n.
 
 ## Vérification de cette édition
 
