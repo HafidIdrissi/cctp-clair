@@ -75,13 +75,27 @@ Les fichiers soumis, les requêtes du modèle et les rapports sont conservés da
 
 ## Tester depuis n8n
 
-n8n permet de déclencher le même essai que le bouton **Tester avec l’exemple**. Le workflow fourni comporte deux blocs, appelés *nœuds*. **Démarrer le test** attend votre clic. **Analyser le PDF fictif** demande à CCTP Clair d’analyser le PDF fourni avec les règles du 1er juillet 2024. CCTP Clair lit le document, recherche les articles et prépare le rapport sur votre PC.
+Le workflow fourni lance le même essai que le bouton **Tester avec l’exemple**, avec le PDF de démonstration et la date du **1er juillet 2024**. Les deux premiers blocs du schéma sont les nœuds que vous verrez dans n8n.
+
+```mermaid
+flowchart LR
+    A["Démarrer le test"] --> B["Analyser le PDF fictif"]
+    B -->|Demande d’analyse| C["CCTP Clair sur le PC"]
+    C -->|Lien de suivi| D["Sortie du nœud dans n8n"]
+    D -->|Ouvrir le lien| E["Mes rapports"]
+```
 
 1. **Ouvrez CCTP Clair.** Double-cliquez sur **Lancer CCTP Clair.cmd** et gardez la fenêtre ouverte. Attendez que [l’interface CCTP Clair](http://127.0.0.1:8789/) s’affiche.
 2. **Ouvrez n8n sur le même PC Windows.** Si votre installation locale est déjà démarrée, [ouvrez l’éditeur n8n](http://localhost:5678/). Si vous avez installé n8n globalement avec npm, vous pouvez le démarrer en saisissant `n8n start` dans un terminal. Le raccourci utilise le port par défaut, 5678. [Installation locale de n8n](https://docs.n8n.io/hosting/installation/npm/)
 3. **Importez le workflow une première fois.** Dans n8n, créez un workflow vide. En haut à droite, cliquez sur **⋯ → Import from File**. Dans le dossier ZIP déjà extrait, ouvrez le sous-dossier **n8n** et choisissez **Tester CCTP Clair.json**. Les deux nœuds apparaissent, reliés par une flèche. [Voir le workflow fourni](n8n/Tester%20CCTP%20Clair.json)
 4. **Lancez le test.** Cliquez sur **Execute workflow**. Une fois le second nœud vert, ouvrez **Analyser le PDF fictif**. Dans **Output**, copiez la valeur du champ `url` et ouvrez-la dans votre navigateur. Le vert indique que CCTP Clair a accepté la demande. L’analyse peut encore être en cours.
 5. **Lisez le résultat.** Le lien vous amène à l’analyse dans **Mes rapports**. Quand **Rapport prêt** apparaît, cliquez sur **Lire le rapport** ou **Télécharger le PDF**.
+
+**Pour refaire l’essai avec un autre modèle local**, ouvrez le nœud **Analyser le PDF fictif**, puis **Parameters**. Dans le champ **JSON** du corps de la requête, remplacez `{"demo":true}` par l’exemple ci-dessous. Utilisez le nom exact d’un modèle de comparaison déjà installé sur le PC, puis cliquez de nouveau sur **Execute workflow**. Chaque exécution crée une nouvelle analyse. [Installer un modèle Ollama](#changer-de-modèle-ollama)
+
+```json
+{"demo": true, "model": "qwen3:4b"}
+```
 
 **Si n8n indique « connexion refusée »**, ouvrez d’abord [CCTP Clair sur ce PC](http://127.0.0.1:8789/). Si la page est inaccessible, redémarrez le lanceur et attendez son ouverture avant de réexécuter le workflow. Ce workflow utilise l’adresse locale `127.0.0.1` depuis n8n. Il est prévu pour n8n exécuté directement sur le même Windows. Dans Docker ou n8n Cloud, cette adresse désigne l’environnement qui héberge n8n.
 
