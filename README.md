@@ -2,6 +2,13 @@
 
 CCTP Clair lit un cahier des clauses techniques particulières sur votre PC et rapproche ses prescriptions des articles juridiques disponibles. Son rapport indique le passage examiné, la règle retenue et le résultat du contrôle.
 
+## Tester le SLM maintenant
+
+- **Première utilisation sur Windows ?** [Téléchargez CCTP Clair](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip), faites un clic droit sur le ZIP → **Extraire tout**, puis ouvrez le dossier extrait et double-cliquez sur **Lancer CCTP Clair.cmd**.
+- **CCTP Clair est déjà lancé sur ce PC ?** [Ouvrez l’interface locale](http://127.0.0.1:8789/) et cliquez sur **Tester avec l’exemple**. Le PDF, le lieu et la date sont déjà renseignés. Dans **Mes rapports**, cliquez sur **Lire le rapport** dès que **Rapport prêt** apparaît.
+
+[Voir le démarrage en images](guide/premier-essai.gif) · [Changer de modèle Ollama](#changer-de-modèle-ollama)
+
 ## Ouvrir CCTP Clair sur Windows
 
 1. **[Téléchargez CCTP-Clair-Windows.zip](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)**.
@@ -18,6 +25,20 @@ Les fois suivantes, utilisez le même fichier de lancement. Gardez le dossier ex
 Le [PDF fictif fourni](demo/Exemple.pdf) décrit un cheminement piéton de **1,10 m**. Le bouton d’essai remplit le contexte et choisit le **1er juillet 2024** comme date de référence. Le test est terminé lorsque vous pouvez ouvrir le rapport et télécharger le PDF. Le moteur effectue une nouvelle analyse à chaque essai. Un passage peut rester sans décision lorsque les preuves ou les conditions d’application sont insuffisantes.
 
 Pour examiner votre document, cliquez sur **Choisir un fichier**, renseignez le **lieu** et la **date**, puis cliquez sur **Lancer l’analyse**. Les PDF sont limités à 15 pages. Les fichiers PDF, PNG ou JPEG peuvent peser jusqu’à 25 Mo. La lecture visuelle automatique sélectionne au maximum six pages. Lorsqu’une décision juridique est étayée, le rapport HTML annoté permet d’examiner la ligne au survol ou au clavier.
+
+## Changer de modèle Ollama
+
+1. Dans **Votre document**, cliquez sur **Choisir le modèle local**.
+2. Dans la liste **Comparaison juridique**, sélectionnez un modèle installé sur votre PC.
+3. Cliquez sur **Tester avec l’exemple** pour essayer ce modèle sur le PDF fourni, ou sur **Lancer l’analyse** après avoir rempli le formulaire avec votre propre document.
+
+**Le modèle voulu manque dans la liste ?** Ouvrez le menu **Démarrer** de Windows, recherchez **PowerShell** et ouvrez-le. Pour télécharger par exemple Qwen 3 en version 4B, copiez cette commande et appuyez sur **Entrée**.
+
+```powershell
+ollama pull qwen3:4b
+```
+
+Une fois le téléchargement terminé, revenez dans CCTP Clair, appuyez sur **F5** et choisissez `qwen3:4b` dans la liste. Pour revenir au modèle par défaut, choisissez `ministral-3:3b`. Ce réglage s’applique à la comparaison juridique de la prochaine analyse. La lecture des images utilise Ministral 3B. [Modèle Qwen 3 4B](https://ollama.com/library/qwen3:4b) · [Commandes Ollama](https://docs.ollama.com/cli)
 
 ## Refaire les essais avec les contrats fictifs
 
