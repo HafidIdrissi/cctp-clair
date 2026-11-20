@@ -14,7 +14,7 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur vo
 
 Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.
 
-**Tutoriels vidéo** · [Changer de modèle Ollama](guide/changer-modele.mp4) · [Utiliser n8n](guide/utiliser-n8n.mp4)
+**Guides animés** · [Changer de modèle Ollama](#changer-de-modèle-ollama) · [Utiliser n8n](#tester-depuis-n8n)
 
 ## Refaire les essais avec les contrats fictifs
 
@@ -23,13 +23,13 @@ Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieur
 
 ## Changer de modèle Ollama
 
-[▶ Voir la vidéo : choisir un modèle dans CCTP Clair](guide/changer-modele.mp4)
+![Ouvrir « Choisir le modèle local » et sélectionner un modèle Ollama](guide/changer-modele.gif)
 
 Dans **Votre document → Choisir le modèle local → Comparaison juridique**, sélectionnez un modèle puis lancez l’essai. Pour en ajouter un, ouvrez **PowerShell**, tapez par exemple `ollama pull qwen3:4b`, puis actualisez la page avec **F5**. La lecture des images utilise Ministral 3B.
 
 ## Tester depuis n8n
 
-[▶ Voir la vidéo : importer le workflow, le lancer et ouvrir le suivi](guide/utiliser-n8n.mp4)
+![Importer le workflow dans n8n, lancer l’exemple et ouvrir son rapport](guide/tester-n8n.gif)
 
 1. Lancez CCTP Clair et [ouvrez n8n](http://localhost:5678/) sur le même PC Windows. Ce workflow utilise une installation locale de n8n.
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
