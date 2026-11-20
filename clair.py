@@ -102,7 +102,8 @@ class App(BaseHTTPRequestHandler):
             else: filename,encoded,city,date=data['filename'],data['file_base64'],data['city'],data['date']
             if Path(filename).suffix.lower() not in ('.pdf','.jpg','.jpeg','.png'):raise ValueError('Choisissez un PDF ou une image.')
             state=core.submit(dict(filename=filename,file_base64=encoded,execution_id=str(10**14+randbelow(9*10**14)),
-                metadata=dict(city=city,reference=date,mode='local',vision='vision',format='cards',comparison_model=data.get('model') or models.DEFAULT)))
+                metadata=dict(city=city,reference=date,mode='auto' if (RUNTIME/'piste-active').is_file() else 'local',
+                              vision='vision',format='cards',comparison_model=data.get('model') or models.DEFAULT)))
             core.update(state['id'],filename=filename)
             return self.reply(202,{'id':state['id'],'url':f'http://127.0.0.1:{PORT}/?job='+state['id']})
         except (ValueError,TypeError,KeyError,OSError) as exc:return self.reply(400,{'error':str(exc)[:350]})

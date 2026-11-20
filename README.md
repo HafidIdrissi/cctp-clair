@@ -29,8 +29,27 @@ Dans **Votre document → Choisir le modèle local → Comparaison juridique**, 
 
 ## DILA et API Légifrance via PISTE
 
-- **DILA — recherche sur le PC.** La Direction de l’information légale et administrative diffuse les textes du fonds LEGI en XML. CCTP Clair les indexe pour retrouver la version d’un article applicable à la date du contrat. La démo Windows inclut trois articles de voirie et d’accessibilité. Pour élargir la base, terminez les analyses en cours puis lancez **Actualiser les textes DILA.cmd**. [Voir les XML fournis](demo/legi) · [Téléchargements officiels DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
-- **PISTE — recherche en ligne.** Sur le poste de développement, si la recherche locale est insuffisante, le workflow n8n peut interroger l’API Légifrance via PISTE pour rechercher un article et consulter son texte. Les essais utilisent l’environnement de test (*sandbox*), avec des identifiants PISTE et des quotas d’appels. L’édition Windows de ce dépôt fonctionne en mode local, sans appel à PISTE. [Accéder à PISTE](https://piste.gouv.fr/) · [FAQ officielle de l’API Légifrance](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
+**DILA fonctionne dès le premier essai.** Les trois articles XML fournis sont indexés sur votre PC au démarrage, sans compte. Pour ajouter les textes de mobilité, terminez les analyses en cours, double-cliquez sur **Actualiser les textes DILA.cmd**, puis appuyez sur **O** pour confirmer. Attendez le message **Index local mis a jour** avant de lancer un nouveau contrôle. Prévoyez Internet et plusieurs Go libres. [Voir les XML inclus](demo/legi) · [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
+
+**PISTE est facultatif.** Activez-le si vous souhaitez que le moteur recherche aussi des articles en ligne lorsque les sources locales sont insuffisantes. Le relais fourni utilise l’environnement de test (*sandbox*) et les quotas de votre application.
+
+<details>
+<summary><strong>Activer PISTE sur mon PC Windows</strong></summary>
+
+1. Lancez CCTP Clair une première fois. Démarrez aussi n8n directement sur le même PC, sur le port 5678. [Installation locale de n8n](https://docs.n8n.io/hosting/installation/npm/)
+2. Créez votre compte PISTE. Dans votre espace, ouvrez votre application **sandbox**, accordez-lui l’accès à l’API **Légifrance** et acceptez les conditions demandées. Gardez son **Client ID** et son **Client Secret** pour l’étape 4. [Inscription PISTE](https://piste.gouv.fr/registration) · [Fiche officielle de l’API](https://www.data.gouv.fr/dataservices/legifrance)
+3. Dans le dossier extrait, double-cliquez sur **Configurer PISTE.cmd** et gardez la fenêtre ouverte. Dans n8n, créez un workflow vide, puis choisissez **⋯ → Import from File** et ouvrez [Relais PISTE sandbox.json](n8n/Relais%20PISTE%20sandbox.json). Dans le premier nœud **Rechercher un critère manquant**, créez un identifiant **Header Auth** et copiez les champs **Name** et **Value** affichés par l’assistant. Cette clé relie CCTP Clair à votre n8n.
+4. Dans le nœud **PISTE · recherche ou article**, créez un identifiant **OAuth2 API**. Choisissez **Client Credentials**, saisissez vos deux identifiants PISTE, puis renseignez les champs suivants.
+
+   | Champ dans n8n | Valeur |
+   | --- | --- |
+   | Access Token URL | `https://sandbox-oauth.piste.gouv.fr/api/oauth/token` |
+   | Scope | `openid` |
+   | Authentication | `Body` |
+
+5. Enregistrez les identifiants et **publiez ou activez le workflow**. Revenez à la fenêtre **Configurer PISTE** et appuyez sur **Entrée**. Le message **Article reçu** confirme qu’un article a été récupéré avec votre compte et active PISTE pour les prochaines analyses. Pour revenir au mode local, rouvrez le même assistant et confirmez avec **O**.
+
+</details>
 
 ## Partie technique — comment fonctionne le SLM ?
 

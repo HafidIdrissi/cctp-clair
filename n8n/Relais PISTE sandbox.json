@@ -1,0 +1,118 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slm-piste-recovery-v6",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        },
+        "responseData": "firstEntryJson"
+      },
+      "id": "8f63f41a-bb67-40d4-a0a3-6cdd9a45e3d4",
+      "name": "Rechercher un critère manquant",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a95399eb-e03c-4000-baba-b3dc6dacc29d"
+    },
+    {
+      "name": "Valider les mots-clés et la date",
+      "id": "f3eca671-55d3-4880-b0b9-63ea01aa04e7",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "jsCode": "\nconst p=$json.body;\nif(!p || typeof p!=='object' || Array.isArray(p))throw new Error('Requête invalide');\nlet body, endpoint;\nif(p.operation==='search'){\n if(Object.keys(p).sort().join(',')!=='date,fond,operation,query')throw new Error('Champs inconnus');\n if(!['CODE_DATE','LODA_DATE'].includes(p.fond))throw new Error('Fonds interdit');\n if(typeof p.query!=='string'||p.query.length<3||p.query.length>100||!/^\\p{L}+(?:[ '\\u2019-]\\p{L}+){0,11}$/u.test(p.query))throw new Error('Mots-clés invalides');\n const epoch=Date.parse(p.date+'T12:00:00Z');\n if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(p.date)||!Number.isFinite(epoch)||new Date(epoch).toISOString().slice(0,10)!==p.date)throw new Error('Date invalide');\n endpoint='/search';\n body={fond:p.fond,recherche:{champs:[{typeChamp:'ARTICLE',criteres:[{typeRecherche:'TOUS_LES_MOTS_DANS_UN_CHAMP',valeur:p.query,operateur:'ET'}],operateur:'ET'}],filtres:[{facette:'DATE_VERSION',singleDate:epoch}],pageNumber:1,pageSize:5,operateur:'ET',sort:'PERTINENCE',typePagination:'ARTICLE'}};\n}else if(p.operation==='reference'){\n if(Object.keys(p).sort().join(',')!=='code,date,numero,operation')throw new Error('Champs inconnus');\n if(typeof p.code!=='string'||p.code.length>180||!/^Code [\\p{L} '\\u2019-]+$/u.test(p.code))throw new Error('Code invalide');\n if(typeof p.numero!=='string'||!(/^[LRD]?[.*]?\\s*\\d+(?:-\\d+){0,4}$/).test(p.numero)||p.numero.length>30)throw new Error('Numéro invalide');\n const epoch=Date.parse(p.date+'T12:00:00Z');\n if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(p.date)||!Number.isFinite(epoch)||new Date(epoch).toISOString().slice(0,10)!==p.date)throw new Error('Date invalide');\n endpoint='/search';\n body={fond:'CODE_DATE',recherche:{champs:[{typeChamp:'NUM_ARTICLE',criteres:[{typeRecherche:'EXACTE',valeur:p.numero,operateur:'ET'}],operateur:'ET'}],filtres:[{facette:'DATE_VERSION',singleDate:epoch},{facette:'NOM_CODE',valeurs:[p.code]}],pageNumber:1,pageSize:5,operateur:'ET',sort:'PERTINENCE',typePagination:'ARTICLE'}};\n}else if(p.operation==='article'){\n if(Object.keys(p).sort().join(',')!=='id,operation'||!/^LEGIARTI\\d{12}$/.test(p.id))throw new Error('Article invalide');\n endpoint='/consult/getArticle';body={id:p.id};\n}else throw new Error('Opération interdite');\nreturn [{json:{endpoint,body,request:p}}];\n"
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app' + $json.endpoint }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.body }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "9cb58388-ff3d-4579-8ef3-16cf6d9b0c99",
+      "name": "PISTE · recherche ou article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "name": "Retourner la réponse et la trace",
+      "id": "c5f8b83f-8520-4fb1-a453-0208eb956147",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const response=$json.error?{error:{type:'api_error',statusCode:Number($json.error.statusCode || $json.error.httpCode || 0)}}:$json; return [{json:{execution_id:String($execution.id),request:$('Valider les mots-clés et la date').first().json.request,response}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Rechercher un critère manquant": {
+      "main": [
+        [
+          {
+            "node": "Valider les mots-clés et la date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valider les mots-clés et la date": {
+      "main": [
+        [
+          {
+            "node": "PISTE · recherche ou article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PISTE · recherche ou article": {
+      "main": [
+        [
+          {
+            "node": "Retourner la réponse et la trace",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "name": "CCTP Clair - Relais PISTE sandbox",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}
