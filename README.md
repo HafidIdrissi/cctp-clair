@@ -10,6 +10,8 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur vo
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
 3. Dans **Mes rapports**, attendez **Rapport prêt**, puis cliquez sur **Lire le rapport**.
 
+Pour vérifier le premier essai, cherchez deux passages du PDF fictif dans le rapport. La **largeur libre de 1,10 m** doit apparaître en **rouge (non conforme)** et la **fente de grille de 1,5 cm** en **vert (conforme)**. Survolez un passage ou sélectionnez-le au clavier pour lire la raison et ouvrir l’article sur Légifrance. L’exemple utilise les textes DILA inclus, à la date du 1er juillet 2024.
+
 ![Du bouton Tester avec l’exemple à la lecture du rapport](guide/premier-essai.gif)
 
 Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.

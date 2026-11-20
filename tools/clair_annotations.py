@@ -49,4 +49,4 @@ def render(html, result):
               for i,r in rows.items() if i not in seen]
     if extras:
         html = html.replace('</body>','<section><h2>Passages comparés aux textes juridiques</h2>'+''.join(extras)+'</section></body>')
-    return html.replace('</head>', '<style>'+STYLE+'</style></head>').encode('utf8')
+    return html.replace('<body', '<style>'+STYLE+'</style><body', 1).encode('utf8')

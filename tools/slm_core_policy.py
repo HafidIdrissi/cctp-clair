@@ -30,7 +30,7 @@ def coverage(body,store=None,cache=None,today=None,*,catalogue_call=None):
     selected={**plan.get('sources_cache',{}),**plan.get('sources_piste',{}),**plan.get('sources_locales',{})}
     mark_reviewed_sources(selected,plan['date_reference'])
     if not targets:return result
-    if 'scope' not in selected and plan['base_recente'] and plan['date_couverte']:
+    if 'scope' not in selected and plan['date_couverte'] and plan['instantane_verifie']:
         spec=TOPICS['scope'];reference=plan['date_reference']
         rows,audit=traced_search(store or DilaStore(DEFAULT_DB_PATH),'',reference,
             code=LOCAL_INSTRUMENTS.get('scope',spec.get('code')),article=spec.get('article'),

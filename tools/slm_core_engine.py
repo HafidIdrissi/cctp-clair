@@ -385,6 +385,18 @@ def review(analysis,readings,plan,*,execution_id,release,progress=None):
                 emit('orientation_recherche','done',fact_id=fact['id'],**row['orientation_recherche_core'])
             review_point(row,view,initial_pool,reference,info,caller=caller,source_search=lookup,
                 piste_call=lambda payload:piste_request(payload,fact_id=fact['id']),query_planner=general_search_plan)
+            check=row.get('verification_article',{})
+            if fact.get('type_fait') in SCOPED and check.get('etapes_ciblees',{}).get('documentary_role',{}).get('role')=='prescription':
+                from slm_v6_semantic_review import source_valid
+                excluded={entry['source_id'] for entry in row.get('sources_hors_champ_core',[])}
+                candidates={s['id']:s for s in check.get('sources_complementaires_v6',[])
+                    if source_valid(s,reference) and s['id'] not in excluded
+                    and (s.get('provenance')!='dila_open_data' or s.get('freshness_confirmed') is True)}
+                if candidates.keys()-initial_pool.keys():
+                    combined={**candidates,**initial_pool}
+                    eligible={k:v for k,v in combined.items() if k not in excluded}
+                    if programmed_decision(row,view,eligible,reference,info):
+                        row['verification_article']['avant_controle_programme']=check
         audit_relation(row,view,info,caller)
         check=row.get('verification_article',{})
         retain_qualified_attribution(row)

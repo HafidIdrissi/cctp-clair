@@ -21,9 +21,10 @@ def coverage(body,store=None,cache=None,today=None,*,inventory_fn=None):
     now=today or date.today()
     try:
         stamp=date.fromisoformat(state.get('verified_through',''))
-        fresh=state.get('continuity_verified') is True and 0<=(now-stamp).days<=MAX_AGE_DAYS
+        verified_snapshot=state.get('continuity_verified') is True and stamp<=now
+        fresh=verified_snapshot and (now-stamp).days<=MAX_AGE_DAYS
         temporal=reference<=stamp.isoformat()
-    except (ValueError,TypeError):fresh=temporal=False
+    except (ValueError,TypeError):fresh=temporal=verified_snapshot=False
     cached=((cached_sources(reference,CACHE_DB) if cache is None else cache) if enabled else {})
     local,selected_cache,decisions,needed,points,queries={},{},{},{},[],{}
     with stage('recherche_dila',date_reference=reference):
@@ -39,7 +40,9 @@ def coverage(body,store=None,cache=None,today=None,*,inventory_fn=None):
                 for topic in topics:
                     if topic not in decisions:
                         spec=TOPICS[topic];rows=[];audit=None
-                        reason=('base_dila_vide' if not state.get('article_count') else 'base_dila_a_actualiser' if not fresh else 'date_posterieure_au_corpus' if not temporal else None)
+                        # A verified historical snapshot can supply a dated catalogue article
+                        # even when it is too old to answer a question about today's law.
+                        reason=('base_dila_vide' if not state.get('article_count') else 'base_dila_a_actualiser' if not verified_snapshot else 'date_posterieure_au_corpus' if not temporal else None)
                         if not reason:
                             code=LOCAL_INSTRUMENTS.get(topic,spec.get('code'))
                             rows,audit=traced_search(store,'' if code and spec.get('article') else spec.get('expression') or spec.get('title_terms',''),reference,code=code,article=spec.get('article'),limit=20,fact_id=fact['id'],origin='reference_du_catalogue')
@@ -77,7 +80,7 @@ def coverage(body,store=None,cache=None,today=None,*,inventory_fn=None):
                 method='type_explicite' if topics else 'recherche_litterale_sans_repli_thematique',status_detail=point['statut'])
     specs=[dict(TOPICS[t],id=t,fact_ids=sorted(set(ids)),motif_fallback=decisions[t]['motif']) for t,ids in needed.items()]
     plan=dict(mode='dila_local_prioritaire_v5',date_reference=reference,perimetre='Critères sourcés et clauses documentaires ; aucune couverture exhaustive garantie',
-        base_dila=state,fraicheur_max_jours=MAX_AGE_DAYS,base_recente=fresh,date_couverte=temporal,piste_autorise=allowed,
+        base_dila=state,fraicheur_max_jours=MAX_AGE_DAYS,base_recente=fresh,date_couverte=temporal,instantane_verifie=verified_snapshot,piste_autorise=allowed,
         points=points,requetes=specs,decisions=decisions,recherche_piste_necessaire=bool(specs),recherche_piste_executee=False,
         sources_locales=local,sources_cache=selected_cache,cache_hits=list(selected_cache),requetes_locales=len(queries),
         recherche_exhaustive=False,conformite_globale_etablie=False,

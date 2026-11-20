@@ -18,6 +18,8 @@ import clair_model_choice as models
 from dila_local_store import DilaStore, DEFAULT_DB_PATH
 from clair_annotations import render
 from slm_source_display import source_display
+from slm_core_compact_report import criterion_reason
+from slm_v6_presentation import row_presentation
 
 PORT = 8789
 RUNTIME = ROOT / 'local'
@@ -83,9 +85,11 @@ class App(BaseHTTPRequestHandler):
         if match[2]=='pdf':return self.reply(200,base64.b64decode(report['pdf_base64']),'application/pdf','rapport.pdf')
         if match[2]=='inspection':return self.reply(200,report['preuves_json'],download='inspection.json')
         rows=[]
-        for line in report['preuves_json']['analyse']['lignes']:
+        analysis=report['preuves_json']['analyse']
+        for line in analysis['lignes']:
             fact=line.get('fait') or {}
-            rows.append(dict(id=fact.get('id'),page=fact.get('page'),quote=fact.get('citation_visible'),status=line.get('statut'),source_display=source_display(line),explanation=line.get('explication')))
+            reason=criterion_reason(line,row_presentation(line,analysis)) or line.get('explication')
+            rows.append(dict(id=fact.get('id'),page=fact.get('page'),quote=fact.get('citation_visible'),status=line.get('statut'),source_display=source_display(line),explanation=reason))
         html=render(report['rapport_html'],{'findings':rows})
         return self.reply(200,html,'text/html; charset=utf-8','rapport-annote.html' if match[2]=='html' else None)
 
