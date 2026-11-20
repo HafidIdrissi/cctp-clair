@@ -29,13 +29,15 @@ Dans **Votre document → Choisir le modèle local → Comparaison juridique**, 
 
 ## Tester depuis n8n
 
+![Workflow complet dans n8n, de la réception du CCTP à la remise du rapport, avec un zoom sur chaque étape](guide/workflow-n8n-complet.gif)
+
 **Voir le workflow complet.** Sur le PC de développement, [ouvrir le workflow SLM CCTP Clair dans n8n](http://localhost:5678/workflow/SlmCctpClairV1). Dans l’éditeur, utilisez **Zoom to fit** pour afficher les deux entrées (interface et formulaire), le contrôle du moteur, le suivi de l’analyse et la remise du rapport. L’OCR, la recherche DILA/PISTE et la comparaison juridique s’exécutent dans le moteur Python appelé par le workflow.
 
 Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from File** puis [SLM CCTP Clair complet.json](n8n/SLM%20CCTP%20Clair%20complet.json) pour explorer les 16 nœuds et leur note. Son exécution nécessite le moteur de développement attendu sur le port `8776`. L’entrée par l’interface utilise aussi l’interface sur `8777` et un identifiant **Header Auth** à configurer dans n8n.
 
 **Lancer la démo du ZIP.** Ce parcours utilise deux nœuds et le service portable sur le port `8789`.
 
-![Importer le workflow dans n8n, lancer l’exemple et ouvrir son rapport](guide/tester-n8n.gif)
+[Voir le GIF du test rapide à deux nœuds](guide/tester-n8n.gif)
 
 1. Lancez CCTP Clair et [ouvrez n8n](http://localhost:5678/) sur le même PC Windows. Ce workflow utilise une installation locale de n8n.
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
