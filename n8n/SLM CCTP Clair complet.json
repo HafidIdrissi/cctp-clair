@@ -1,0 +1,572 @@
+{
+  "name": "SLM CCTP Clair · Ministral 3B · DILA + PISTE",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clair-cctp-clair-v1",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {
+          "ipWhitelist": "127.0.0.1,::1,::ffff:127.0.0.1"
+        }
+      },
+      "id": "417dc1b2-1b3c-595f-9f7c-ee71b2b94b95",
+      "name": "Recevoir le document depuis Clair",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "4679a27d-14e2-5d21-902d-4c80c2ad045d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const uploaded=$input.first();\nconst meta=JSON.parse(uploaded.json.body?.metadata||'{}');\nif (!uploaded.binary?.document || !/^[a-f0-9]{32}$/.test(meta.web_job_id||'')) throw new Error('Document ou identifiant absent.');\nconst modes={auto:'Analyse automatique : local puis PISTE si nécessaire',local:'Pré-analyse locale des faits + textes officiels',full:'Revue du PDF + lois + annexe images',reading:'Lecture OCR + images - test sans API'};\nconst formats={cards:'Visuelle et simple - cartes (recommandée)',table:'Tableau d’audit - détaillé'};\nif (!modes[meta.mode] || !formats[meta.format] || !['vision','ocr'].includes(meta.vision) || !['none','rerv'].includes(meta.technical)) throw new Error('Paramètres inconnus.');\nconst clean=v=>String(v||'').trim();\nconst mapped={json:{web_job_id:meta.web_job_id,origine_depot:'interface_web',\n'Mode d’analyse':modes[meta.mode],'Lecture visuelle':meta.vision==='ocr'?'OCR seul':'OCR + Ministral vision',\n'Pages visuelles à lire (facultatif)':clean(meta.pages),'Date de référence (AAAA-MM-JJ)':clean(meta.reference),'Commune(s) du projet':clean(meta.city),\n'Présentation du rapport':formats[meta.format],'Département / région (facultatif)':clean(meta.region),\n'Périmètre ou lot à contrôler':clean(meta.scope),'Pièces ou règles locales à vérifier (facultatif)':clean(meta.local_rules),\n'Référentiel technique optionnel':meta.technical==='rerv'?'RER-V avril 2021 - comparaison technique optionnelle':'Aucun - revue nationale et pièces locales à vérifier',\n'Citation justifiant la référence RER-V (facultatif)':clean(meta.rerv_quote)},\nbinary:{Document_PDF_ou_image:{...uploaded.binary.document,fileName:clean(meta.filename)||uploaded.binary.document.fileName}}};\nreturn (( $input )=>{const item=$input.first();\nconst form={...item.json};\nconst clean=v=>String(v??'').trim();\nconst binaries=Object.entries(item.binary??{});\nif(binaries.length!==1)throw new Error('Un seul PDF ou une seule image est attendu.');\nconst file=binaries[0][1];\nif(!/\\.(pdf|png|jpe?g)$/i.test(file.fileName??''))throw new Error('Format non pris en charge : PDF, PNG ou JPEG attendu.');\nconst date=clean(form['Date de référence (AAAA-MM-JJ)']);\nconst epoch=Date.parse(date+'T12:00:00Z');\nif(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!Number.isFinite(epoch)||new Date(epoch).toISOString().slice(0,10)!==date)throw new Error('Date réelle obligatoire au format AAAA-MM-JJ.');\nconst city=clean(form['Commune(s) du projet']);\nif(city.length<2||city.length>300)throw new Error('Commune obligatoire (2 à 300 caractères).');\nconst allowed={\n 'Mode d’analyse':['Analyse automatique : local puis PISTE si nécessaire','Pré-analyse locale des faits + textes officiels','Revue du PDF + lois + annexe images','Lecture OCR + images - test sans API'],\n 'Lecture visuelle':['OCR + Ministral vision','OCR seul'],\n 'Présentation du rapport':['Visuelle et simple - cartes (recommandée)','Tableau d’audit - détaillé'],\n 'Référentiel technique optionnel':['Aucun - revue nationale et pièces locales à vérifier','RER-V avril 2021 - comparaison technique optionnelle']\n};\nfor(const [key,values] of Object.entries(allowed))if(!values.includes(form[key]))throw new Error('Choix inconnu : '+key);\nform['Date de référence (AAAA-MM-JJ)']=date;\nform['Commune(s) du projet']=city;\nform['Document PDF ou image']={filename:file.fileName};\nreturn [{json:form,binary:{Document_PDF_ou_image:file}}];})({first:()=>mapped});"
+      },
+      "id": "ab26c1bf-6ac9-5b3c-a58a-ac3976636d5c",
+      "name": "Adapter le dépôt depuis l’interface",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "formTitle": "SLM CCTP Clair · Ministral 3B",
+        "formDescription": "Candidate séparée : DILA locale puis PISTE si nécessaire, rapport lisible et inspection des preuves. Destinée aux CCTP courts. La rapidité et la couverture complète restent à valider ; aucun résultat incertain n’est transformé en conformité.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Document PDF ou image",
+              "fieldType": "file",
+              "multipleFiles": false,
+              "acceptFileTypes": ".pdf,.png,.jpg,.jpeg",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Mode d’analyse",
+              "fieldType": "dropdown",
+              "defaultValue": "Analyse automatique : local puis PISTE si nécessaire",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Analyse automatique : local puis PISTE si nécessaire"
+                  },
+                  {
+                    "option": "Pré-analyse locale des faits + textes officiels"
+                  },
+                  {
+                    "option": "Revue du PDF + lois + annexe images"
+                  },
+                  {
+                    "option": "Lecture OCR + images - test sans API"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Lecture visuelle",
+              "fieldType": "dropdown",
+              "defaultValue": "OCR + Ministral vision",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "OCR + Ministral vision"
+                  },
+                  {
+                    "option": "OCR seul"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Pages visuelles à lire (facultatif)",
+              "placeholder": "Ex. 1,3-5 ; maximum 6 pages. Vide : sélection automatique."
+            },
+            {
+              "fieldLabel": "Date de référence (AAAA-MM-JJ)",
+              "placeholder": "AAAA-MM-JJ — date pertinente pour le contrôle",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Commune(s) du projet",
+              "placeholder": "Ex. Nantes, Lyon, Tain-l’Hermitage…",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Département / région (facultatif)"
+            },
+            {
+              "fieldLabel": "Pièces ou règles locales à vérifier (facultatif)",
+              "fieldType": "textarea",
+              "placeholder": "Arrêtés, prescriptions de la collectivité, pièces manquantes…"
+            },
+            {
+              "fieldLabel": "Périmètre ou lot à contrôler",
+              "placeholder": "Contexte du contrôle ; aucun lot n’est exclu automatiquement"
+            },
+            {
+              "fieldLabel": "Présentation du rapport",
+              "fieldType": "dropdown",
+              "defaultValue": "Visuelle et simple - cartes (recommandée)",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Visuelle et simple - cartes (recommandée)"
+                  },
+                  {
+                    "option": "Tableau d’audit - détaillé"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Contrôler le CCTP",
+          "path": "slm-cctp-clair-v1"
+        }
+      },
+      "id": "f8890a67-418e-5e95-9fb0-73749c6f018e",
+      "name": "Déposer le CCTP dans n8n",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        304
+      ],
+      "webhookId": "aff14fef-b533-55b3-978f-35319391e9e0"
+    },
+    {
+      "parameters": {
+        "jsCode": "const incoming=$input.first();\nconst json={...incoming.json,origine_depot:'formulaire_n8n'};\ndelete json.web_job_id;\njson['Référentiel technique optionnel']='Aucun - revue nationale et pièces locales à vérifier';\ndelete json['Citation justifiant la référence RER-V (facultatif)'];\nreturn (($input)=>{const item=$input.first();\nconst form={...item.json};\nconst clean=v=>String(v??'').trim();\nconst binaries=Object.entries(item.binary??{});\nif(binaries.length!==1)throw new Error('Un seul PDF ou une seule image est attendu.');\nconst file=binaries[0][1];\nif(!/\\.(pdf|png|jpe?g)$/i.test(file.fileName??''))throw new Error('Format non pris en charge : PDF, PNG ou JPEG attendu.');\nconst date=clean(form['Date de référence (AAAA-MM-JJ)']);\nconst epoch=Date.parse(date+'T12:00:00Z');\nif(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!Number.isFinite(epoch)||new Date(epoch).toISOString().slice(0,10)!==date)throw new Error('Date réelle obligatoire au format AAAA-MM-JJ.');\nconst city=clean(form['Commune(s) du projet']);\nif(city.length<2||city.length>300)throw new Error('Commune obligatoire (2 à 300 caractères).');\nconst allowed={\n 'Mode d’analyse':['Analyse automatique : local puis PISTE si nécessaire','Pré-analyse locale des faits + textes officiels','Revue du PDF + lois + annexe images','Lecture OCR + images - test sans API'],\n 'Lecture visuelle':['OCR + Ministral vision','OCR seul'],\n 'Présentation du rapport':['Visuelle et simple - cartes (recommandée)','Tableau d’audit - détaillé'],\n 'Référentiel technique optionnel':['Aucun - revue nationale et pièces locales à vérifier','RER-V avril 2021 - comparaison technique optionnelle']\n};\nfor(const [key,values] of Object.entries(allowed))if(!values.includes(form[key]))throw new Error('Choix inconnu : '+key);\nform['Date de référence (AAAA-MM-JJ)']=date;\nform['Commune(s) du projet']=city;\nform['Document PDF ou image']={filename:file.fileName};\nreturn [{json:form,binary:{Document_PDF_ou_image:file}}];})({first:()=>({...incoming,json})});"
+      },
+      "id": "2d299473-f611-5bb5-a327-38b1b963f4b5",
+      "name": "Adapter le dépôt depuis n8n",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        288,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item=$input.first();\nconst f=item.json;const keys=Object.keys(item.binary||{});if(keys.length!==1)throw new Error('Un fichier requis.');\nconst bytes=await this.helpers.getBinaryDataBuffer(0,keys[0]);\nif(!bytes.length||bytes.length>25*1024*1024)throw new Error('Document limité à 25 Mo.');\nconst modes={'Analyse automatique : local puis PISTE si nécessaire':'auto','Pré-analyse locale des faits + textes officiels':'local','Revue du PDF + lois + annexe images':'full','Lecture OCR + images - test sans API':'reading'};\nreturn [{json:{...f,request:{file_base64:bytes.toString('base64'),filename:item.binary[keys[0]].fileName,\n execution_id:String($execution.id),metadata:{city:f['Commune(s) du projet'],reference:f['Date de référence (AAAA-MM-JJ)'],\n mode:modes[f['Mode d’analyse']],vision:f['Lecture visuelle']==='OCR seul'?'ocr':'vision',\n pages:f['Pages visuelles à lire (facultatif)']||'',format:f['Présentation du rapport']==='Tableau d’audit - détaillé'?'table':'cards',\n web_job_id:f.web_job_id||null}}}}];"
+      },
+      "id": "ae72e782-f44e-5aef-b4e4-6010ecde5bf7",
+      "name": "Charger un PDF ou une image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8776/jobs",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.request }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "aee33b3d-e104-59a3-970f-371c4ee221bc",
+      "name": "Analyser le CCTP · moteur métier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "e8ce4610-7310-59ca-b073-57b225934b96",
+      "name": "Attendre le traitement",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        160
+      ],
+      "webhookId": "de40b236-6de8-4ad9-b72f-fd172c85bc98"
+    },
+    {
+      "parameters": {
+        "url": "={{ (()=>{const id=String($json.id||'');if(!/^[a-f0-9]{32}$/.test(id)||String($json.execution_id)!==String($execution.id))throw new Error('Analyse non liée à cette exécution');return 'http://127.0.0.1:8776/jobs/'+id;})() }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "b2f98361-782a-5ad0-bdf5-f3b265fbc390",
+      "name": "Lire l’avancement du moteur",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1424,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "18b20827-82e4-48c1-8706-3d475e2a1c7f",
+              "leftValue": "={{ ['done','error'].includes($json.status) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e7d66a8e-79bb-5b9f-a1c3-8c05d6070714",
+      "name": "Analyse terminée ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1696,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "if($json.status==='error')throw new Error($json.error||'Erreur du moteur métier');return [$input.first()];"
+      },
+      "id": "fce9d358-13c8-5797-bf01-4d112a962b35",
+      "name": "Vérifier le résultat du moteur",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ (()=>{const id=String($json.id||'');if(!/^[a-f0-9]{32}$/.test(id)||String($json.execution_id)!==String($execution.id))throw new Error('Analyse non liée à cette exécution');return 'http://127.0.0.1:8776/jobs/'+id+'/report';})() }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "9d4a63e0-f66c-5e95-9a39-19682f4664e9",
+      "name": "Récupérer le rapport",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2224,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2a25a5a7-46f5-54f1-b678-f200283e44ba",
+              "leftValue": "={{ $('Charger un PDF ou une image').first().json.origine_depot === 'interface_web' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "55b5d4c3-0999-5ad9-8fb4-870f823b7bdd",
+      "name": "Rapport demandé depuis l’interface ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2480,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [$input.first()];"
+      },
+      "id": "c6771a4d-39b7-53a2-8aea-670be6b95dc7",
+      "name": "Renvoyer le rapport à Clair",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2752,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "showText",
+        "responseText": "={{ '<section aria-label=\"Inspection de cette analyse\" style=\"max-width:1100px;margin:24px auto;padding:24px;background:#fff;border:1px solid #b8c5d9;border-top:5px solid #2447c7;border-radius:12px;color:#172536;font:17px/1.6 Arial,sans-serif\"><h2 style=\"margin:0 0 10px;font-size:24px\">Inspection du CCTP</h2><p>Retrouvez le texte lu, les prompts envoyés au SLM, ses réponses, les règles et les sources de cette analyse.</p><a href=\"http://127.0.0.1:8777/?n8n_execution=' + $execution.id + '\" rel=\"noopener\" style=\"display:inline-block;padding:12px 20px;background:#2447c7;color:#fff;border-radius:6px;font-weight:700;text-decoration:none\">Ouvrir l’inspection de cette analyse ↗</a><p style=\"margin:12px 0 0;font-size:15px\">L’inspection s’ouvre dans SLM. Cette analyse sera alors disponible dans ses rapports.</p></section>' + $json.html }}"
+      },
+      "id": "2004ddcb-f8b0-53f9-9159-bbb4539d7881",
+      "name": "Afficher le rapport dans n8n",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 2.3,
+      "position": [
+        2752,
+        208
+      ],
+      "webhookId": "b384819d-3972-5a4c-a08b-fcaa9dc63223"
+    },
+    {
+      "parameters": {
+        "content": "# SLM CCTP CLAIR · CANDIDATE\n\nUn seul modèle : ministral-3:3b. DILA locale puis PISTE via le relais existant.\nRapport synthétique lisible ; preuves, prompts et réponses dans l’inspection.\n\nNouvelle identité et nouvelles entrées ; les anciens workflows ne sont pas remplacés.\nRuntime réservé : 127.0.0.1:8776. Release attendue : core-metier-1.5.2-P0P1-OCR1-RECHERCHE1-SYNTHESE2-CLAIR1-237d4e89d6cf.\n\nCe brouillon exige un runtime distinct vérifié avant toute analyse. La suppression artificielle des non-conclusions est interdite. Aucune durée de traitement ni zéro non-conclusion n’a encore été démontré.",
+        "height": 470,
+        "width": 700
+      },
+      "id": "e986a05b-00ad-560c-82bc-e12037da41b8",
+      "name": "Architecture du cœur métier",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -576
+      ]
+    },
+    {
+      "parameters": {
+        "url": "http://127.0.0.1:8776/health",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "908d8aec-01df-53cf-9e65-c2b80d01f6eb",
+      "name": "Vérifier le runtime CCTP Clair",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        -128
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const h=$json;if(h.service!=='slm-cctp-clair'||h.ready!==true||h.model!=='ministral-3:3b'||h.release?.sha256!==\"ee973536c874d763e3bea64329191fdefdc8b2432d51e51f8c4787f6ec6573c6\")throw new Error('Runtime CCTP Clair isolé absent ou release incorrecte. Aucun document transmis.');return [{json:$('Charger un PDF ou une image').first().json}];"
+      },
+      "id": "491ff25a-1b91-51ce-9730-c58fd257ba5d",
+      "name": "Confirmer la version isolée",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -128
+      ]
+    }
+  ],
+  "connections": {
+    "Recevoir le document depuis Clair": {
+      "main": [
+        [
+          {
+            "node": "Adapter le dépôt depuis l’interface",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Déposer le CCTP dans n8n": {
+      "main": [
+        [
+          {
+            "node": "Adapter le dépôt depuis n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adapter le dépôt depuis l’interface": {
+      "main": [
+        [
+          {
+            "node": "Charger un PDF ou une image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adapter le dépôt depuis n8n": {
+      "main": [
+        [
+          {
+            "node": "Charger un PDF ou une image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Charger un PDF ou une image": {
+      "main": [
+        [
+          {
+            "node": "Vérifier le runtime CCTP Clair",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyser le CCTP · moteur métier": {
+      "main": [
+        [
+          {
+            "node": "Attendre le traitement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attendre le traitement": {
+      "main": [
+        [
+          {
+            "node": "Lire l’avancement du moteur",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lire l’avancement du moteur": {
+      "main": [
+        [
+          {
+            "node": "Analyse terminée ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier le résultat du moteur": {
+      "main": [
+        [
+          {
+            "node": "Récupérer le rapport",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Récupérer le rapport": {
+      "main": [
+        [
+          {
+            "node": "Rapport demandé depuis l’interface ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse terminée ?": {
+      "main": [
+        [
+          {
+            "node": "Vérifier le résultat du moteur",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Attendre le traitement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rapport demandé depuis l’interface ?": {
+      "main": [
+        [
+          {
+            "node": "Renvoyer le rapport à Clair",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Afficher le rapport dans n8n",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vérifier le runtime CCTP Clair": {
+      "main": [
+        [
+          {
+            "node": "Confirmer la version isolée",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmer la version isolée": {
+      "main": [
+        [
+          {
+            "node": "Analyser le CCTP · moteur métier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 21600,
+    "saveExecutionProgress": true,
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  }
+}
