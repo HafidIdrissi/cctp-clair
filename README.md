@@ -27,8 +27,13 @@ Dans **Votre document → Choisir le modèle local → Comparaison juridique**, 
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
 3. Cliquez sur **Execute workflow**. Dans **Analyser le PDF fictif → Output**, ouvrez le lien `url` pour suivre l’analyse et lire le rapport.
 
+## DILA et API Légifrance via PISTE
+
+- **DILA — recherche sur le PC.** La Direction de l’information légale et administrative diffuse les textes du fonds LEGI en XML. CCTP Clair les indexe pour retrouver la version d’un article applicable à la date du contrat. La démo Windows inclut trois articles de voirie et d’accessibilité. Pour élargir la base, terminez les analyses en cours puis lancez **Actualiser les textes DILA.cmd**. [Voir les XML fournis](demo/legi) · [Téléchargements officiels DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
+- **PISTE — recherche en ligne.** Sur le poste de développement, si la recherche locale est insuffisante, le workflow n8n peut interroger l’API Légifrance via PISTE pour rechercher un article et consulter son texte. Les essais utilisent l’environnement de test (*sandbox*), avec des identifiants PISTE et des quotas d’appels. L’édition Windows de ce dépôt fonctionne en mode local, sans appel à PISTE. [Accéder à PISTE](https://piste.gouv.fr/) · [FAQ officielle de l’API Légifrance](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
+
 ## Partie technique — comment fonctionne le SLM ?
 
 Le service Python lit le texte du PDF et utilise la reconnaissance de caractères (OCR) et le modèle visuel pour lire les plans. Il recherche dans son index local SQLite les articles DILA applicables à la date choisie. Le modèle Ollama rapproche chaque prescription de la règle trouvée. Python vérifie les seuils chiffrés pris en charge et produit le rapport annoté. Une preuve illisible ou une règle manquante peut laisser un passage sans décision. [Code du moteur](tools/slm_core_engine.py)
 
-La démo contient **trois articles de voirie et d’accessibilité**. Pour élargir le corpus, terminez les analyses en cours puis lancez **Actualiser les textes DILA.cmd**. Les documents et les rapports sont conservés sur votre PC dans `local/`. [Sources juridiques](demo/SOURCES.md) · [Guide détaillé de la version 1.1.2](https://github.com/HafidIdrissi/cctp-clair/blob/v1.1.2/README.md)
+Les documents et les rapports sont conservés sur votre PC dans `local/`. [Sources juridiques](demo/SOURCES.md) · [Guide détaillé de la version 1.1.2](https://github.com/HafidIdrissi/cctp-clair/blob/v1.1.2/README.md)
