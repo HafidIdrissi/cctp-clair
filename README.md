@@ -4,11 +4,13 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur vo
 
 ## Tester le SLM maintenant
 
-**[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/) · [Voir les clics en images](guide/premier-essai.gif)
+**[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/)
 
 1. Faites un clic droit sur le ZIP → **Extraire tout**. Dans le dossier extrait, double-cliquez sur **Lancer CCTP Clair.cmd**.
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
 3. Dans **Mes rapports**, attendez **Rapport prêt**, puis cliquez sur **Lire le rapport**.
+
+![Du bouton Tester avec l’exemple à la lecture du rapport](guide/premier-essai.gif)
 
 Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.
 
@@ -27,14 +29,20 @@ Dans **Votre document → Choisir le modèle local → Comparaison juridique**, 
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
 3. Cliquez sur **Execute workflow**. Dans **Analyser le PDF fictif → Output**, ouvrez le lien `url` pour suivre l’analyse et lire le rapport.
 
+![Parcours illustré dans n8n : importer, exécuter et ouvrir le lien du rapport](guide/tester-n8n.gif)
+
 ## DILA et API Légifrance via PISTE
 
 **DILA fonctionne dès le premier essai.** Les trois articles XML fournis sont indexés sur votre PC au démarrage, sans compte. Pour ajouter les textes de mobilité, terminez les analyses en cours, double-cliquez sur **Actualiser les textes DILA.cmd**, puis appuyez sur **O** pour confirmer. Attendez le message **Index local mis a jour** avant de lancer un nouveau contrôle. Prévoyez Internet et plusieurs Go libres. [Voir les XML inclus](demo/legi) · [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
+
+![Parcours illustré : ouvrir le lanceur DILA, confirmer avec O et attendre la fin](guide/actualiser-dila.gif)
 
 **PISTE est facultatif.** Activez-le si vous souhaitez que le moteur recherche aussi des articles en ligne lorsque les sources locales sont insuffisantes. Le relais fourni utilise l’environnement de test (*sandbox*) et les quotas de votre application.
 
 <details>
 <summary><strong>Activer PISTE sur mon PC Windows</strong></summary>
+
+![Parcours illustré : configurer le relais n8n et vérifier la connexion PISTE](guide/configurer-piste.gif)
 
 1. Lancez CCTP Clair une première fois. Démarrez aussi n8n directement sur le même PC, sur le port 5678. [Installation locale de n8n](https://docs.n8n.io/hosting/installation/npm/)
 2. Créez votre compte PISTE. Dans votre espace, ouvrez votre application **sandbox**, accordez-lui l’accès à l’API **Légifrance** et acceptez les conditions demandées. Gardez son **Client ID** et son **Client Secret** pour l’étape 4. [Inscription PISTE](https://piste.gouv.fr/registration) · [Fiche officielle de l’API](https://www.data.gouv.fr/dataservices/legifrance)
