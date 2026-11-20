@@ -14,6 +14,8 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur vo
 
 Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.
 
+**Tutoriels vidéo** · [Changer de modèle Ollama](guide/changer-modele.mp4) · [Utiliser n8n](guide/utiliser-n8n.mp4)
+
 ## Refaire les essais avec les contrats fictifs
 
 - **Rennes, 4 pages.** Analysez les deux versions au **1er juillet 2024**, avec le même modèle. Page 2, la largeur piétonne passe de **1,10 m** à **1,60 m**. Comparez les justifications dans les rapports. [Version B avec défauts](demo/contrats/CCTP_Rennes_liaison_cyclable_B_avec_defauts_4_pages.pdf) · [Version A corrigée](demo/contrats/CCTP_Rennes_liaison_cyclable_A_version_corrigee_4_pages.pdf) · [Clé de lecture](demo/contrats/Rennes-cle-de-test.md)
@@ -21,15 +23,17 @@ Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieur
 
 ## Changer de modèle Ollama
 
+[▶ Voir la vidéo : choisir un modèle dans CCTP Clair](guide/changer-modele.mp4)
+
 Dans **Votre document → Choisir le modèle local → Comparaison juridique**, sélectionnez un modèle puis lancez l’essai. Pour en ajouter un, ouvrez **PowerShell**, tapez par exemple `ollama pull qwen3:4b`, puis actualisez la page avec **F5**. La lecture des images utilise Ministral 3B.
 
 ## Tester depuis n8n
 
+[▶ Voir la vidéo : importer le workflow, le lancer et ouvrir le suivi](guide/utiliser-n8n.mp4)
+
 1. Lancez CCTP Clair et [ouvrez n8n](http://localhost:5678/) sur le même PC Windows. Ce workflow utilise une installation locale de n8n.
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
 3. Cliquez sur **Execute workflow**. Dans **Analyser le PDF fictif → Output**, ouvrez le lien `url` pour suivre l’analyse et lire le rapport.
-
-![Parcours illustré dans n8n : importer, exécuter et ouvrir le lien du rapport](guide/tester-n8n.gif)
 
 ## DILA et API Légifrance via PISTE
 
