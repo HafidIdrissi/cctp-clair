@@ -4,12 +4,19 @@ const statusLabels={queued:'En attente',running:'Analyse en cours',done:'Rapport
 const stages={reading:'lecture du document',vision:'lecture des images',inventory:'repérage des clauses',legal:'recherche des textes',comparison:'comparaison',report:'rédaction'};
 const requested=new URLSearchParams(location.search).get('job');
 let highlighted=false;
+let activeJob=null;
+let sending=false;
+let refreshId=0;
+let timer;
+function updateLaunchButtons(){
+  for(const button of [el('demo'),el('form').querySelector('button')])button.disabled=sending || !!activeJob;
+}
 async function api(path,options){
   const r=await fetch(path,options);const data=await r.json();
   if(!r.ok)throw Error(data.error || 'Service indisponible.');return data;
 }
-async function reports(){
-  const jobs=await api('/jobs');const list=el('list');const focused=document.activeElement?.href;
+function showReports(jobs){
+  const list=el('list');const focused=document.activeElement?.href;
   list.replaceChildren();
   if(!jobs.length)list.textContent='Vos analyses apparaîtront ici.';
   for(const job of jobs){
@@ -18,6 +25,8 @@ async function reports(){
     const state=document.createElement('div');card.append(state);
     state.textContent=statusLabels[job.status] || job.status;
     if(job.status==='running')state.textContent+=' · '+(stages[job.stage] || 'préparation');
+    const progress=job.progress;
+    if(job.status==='running' && job.stage==='comparison' && progress?.total>0)state.textContent+=' ('+progress.done+' / '+progress.total+')';
     if(job.error)state.textContent+=' · '+job.error;
     if(job.status==='done')for(const [path,label] of [['report','Lire le rapport'],['html','Télécharger le rapport annoté'],['pdf','Télécharger le PDF'],['inspection','Preuves JSON']]){
       const link=document.createElement('a');link.href='/jobs/'+job.id+'/'+path;link.textContent=label;if(path==='report')link.target='_blank';card.append(link);
@@ -25,14 +34,39 @@ async function reports(){
     }
     if(requested===job.id && !highlighted){card.scrollIntoView();highlighted=true;}
   }
-  return jobs.some(j=>['running','queued'].includes(j.status));
 }
-let timer;
-async function refresh(){clearTimeout(timer);try{if(await reports())timer=setTimeout(refresh,3000);}catch(e){el('feedback').textContent=e.message;}}
+async function refresh(){
+  const id=++refreshId;
+  clearTimeout(timer);
+  try{
+    const jobs=await api('/jobs');
+    if(id!==refreshId)return;
+    const previous=activeJob;
+    activeJob=jobs.find(j=>['running','queued'].includes(j.status)) || null;
+    showReports(jobs);
+    if(activeJob){
+      el('feedback').textContent='Analyse de '+(activeJob.filename || 'votre document')+' en cours. Suivez son avancement dans Mes rapports.';
+    }else if(previous){
+      const finished=jobs.find(j=>j.id===previous.id);
+      if(finished?.status==='done')el('feedback').textContent='Rapport prêt. Cliquez sur « Lire le rapport » dans Mes rapports.';
+      if(finished?.status==='error')el('feedback').textContent='Analyse interrompue. Consultez le détail dans Mes rapports.';
+    }
+    updateLaunchButtons();
+  }catch(e){if(id===refreshId)el('feedback').textContent=e.message;}
+  if(id===refreshId && activeJob)timer=setTimeout(refresh,3000);
+}
 async function send(payload){
-  const buttons=[el('demo'),el('form').querySelector('button')];buttons.forEach(b=>b.disabled=true);
-  try{await api('/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,model:el('model').value})});el('feedback').textContent='Analyse lancée. Retrouvez son avancement dans Mes rapports.';await refresh();el('reports').scrollIntoView();}
-  catch(e){el('feedback').textContent=e.message;}finally{buttons.forEach(b=>b.disabled=false);}
+  if(sending || activeJob)return;
+  sending=true;updateLaunchButtons();
+  try{
+    activeJob=await api('/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...payload,model:el('model').value})});
+    el('reports').scrollIntoView();
+  }catch(e){
+    el('feedback').textContent=e.message==='Une analyse Core est déjà en cours.'?'Une analyse a déjà été lancée. Consultez Mes rapports.':e.message;
+  }finally{
+    await refresh();
+    sending=false;updateLaunchButtons();
+  }
 }
 el('demo').onclick=()=>send({demo:true});
 el('form').onsubmit=async e=>{e.preventDefault();const file=el('file').files[0];
@@ -40,6 +74,7 @@ el('form').onsubmit=async e=>{e.preventDefault();const file=el('file').files[0];
   const reader=new FileReader();reader.onload=()=>send({filename:file.name,file_base64:reader.result.split(',')[1],city:el('city').value,date:el('date').value});reader.onerror=()=>el('feedback').textContent='Lecture du fichier impossible.';reader.readAsDataURL(file);};
 api('/models').then(names=>{if(names.length){el('model').replaceChildren(...names.map(n=>new Option(n,n)));if(names.includes('ministral-3:3b'))el('model').value='ministral-3:3b';}}).catch(e=>el('feedback').textContent=e.message);
 refresh();
+window.addEventListener('focus',refresh);
 const tour=[['demo','Cliquez ici pour analyser le PDF fictif avec les règles du 1er juillet 2024.'],['form','Pour votre propre essai, choisissez un fichier, indiquez le lieu et la date, puis lancez l’analyse.'],['reports','Quand le rapport est prêt, cliquez sur Lire le rapport. Survolez un passage encadré pour voir la règle et son lien.']];
 let step=0;
 function closeGuide(){document.querySelector('.target')?.classList.remove('target');el('coach').hidden=true;el('guide').focus();}
