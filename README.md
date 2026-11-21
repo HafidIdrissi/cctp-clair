@@ -16,6 +16,8 @@ Pour vérifier le premier essai, cherchez deux passages du PDF fictif dans le ra
 
 Le rapport de cet exemple affiche **50 %** : un critère conforme sur deux critères avec une décision confirmée. Seuls les critères déclarés conformes ou non conformes entrent dans le calcul.
 
+Dans **Mes rapports**, cliquez sur **Inspecter le CCTP original** pour retrouver chaque passage à sa place sur la page du contrat. Survolez l’encadré rouge ou vert, ou sélectionnez-le au clavier, pour lire le verdict, son motif et l’article de loi. **Télécharger le CCTP inspecté** enregistre les pages et leurs annotations dans un fichier HTML que vous pouvez rouvrir hors ligne. Les passages dont la position reste incertaine sont listés à la fin.
+
 ![Du bouton Tester avec l’exemple à la lecture du rapport](guide/premier-essai.gif)
 
 Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.

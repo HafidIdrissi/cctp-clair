@@ -17,6 +17,7 @@ import slm_core_service as core
 import clair_model_choice as models
 from dila_local_store import DilaStore, DEFAULT_DB_PATH
 from clair_annotations import render
+from clair_document import render_original
 from slm_source_display import source_display
 from slm_core_compact_report import criterion_reason, html_report, pdf_report
 from slm_v6_presentation import row_presentation
@@ -78,11 +79,17 @@ class App(BaseHTTPRequestHandler):
         if path=='/jobs':
             with core.LOCK:
                 return self.reply(200,[{k:s.get(k) for k in ('id','status','stage','error','created_at','filename','progress')} for s in reversed(list(core.STATES.values()))])
-        match=re.fullmatch(r'/jobs/([a-f0-9]{32})/(report|pdf|html|inspection)',path)
+        match=re.fullmatch(r'/jobs/([a-f0-9]{32})/(report|pdf|html|inspection|document|document-html)',path)
         if not match or match[1] not in core.STATES:return self.reply(404,{})
         if core.STATES[match[1]]['status']!='done':return self.reply(409,{'error':'Rapport en préparation.'})
         report=json.loads((core.JOBS/match[1]/'report.json').read_text(encoding='utf8'))
         if match[2]=='inspection':return self.reply(200,report['preuves_json'],download='inspection.json')
+        if match[2] in ('document','document-html'):
+            original=core.JOBS/match[1]/'request.json'
+            if not original.is_file():return self.reply(404,'Le fichier source de cette analyse est indisponible.'.encode(),'text/plain; charset=utf-8')
+            request=json.loads(original.read_text(encoding='utf8'))
+            return self.reply(200,render_original(request,report['preuves_json']),'text/html; charset=utf-8',
+                              download='cctp-inspecte.html' if match[2]=='document-html' else None)
         rows=[]
         analysis=report['preuves_json']['analyse']
         readings=report['preuves_json']['lectures']
@@ -93,6 +100,8 @@ class App(BaseHTTPRequestHandler):
             rows.append(dict(id=fact.get('id'),page=fact.get('page'),quote=fact.get('citation_visible'),status=line.get('statut'),source_display=source_display(line),explanation=reason))
         header,_,_=report['rapport_html'].partition('<body>')
         html=render(header+'<body>'+html_report(readings,analysis)+'</body></html>',{'findings':rows})
+        if match[2]=='report':
+            html=html.replace(b'<body>',b'<body><nav><a href="document">Inspecter le CCTP original</a> &middot; <a href="document-html">T&eacute;l&eacute;charger le CCTP inspect&eacute;</a></nav>',1)
         return self.reply(200,html,'text/html; charset=utf-8','rapport-annote.html' if match[2]=='html' else None)
 
     def do_POST(self):

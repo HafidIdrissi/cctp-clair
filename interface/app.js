@@ -28,8 +28,8 @@ function showReports(jobs){
     const progress=job.progress;
     if(job.status==='running' && job.stage==='comparison' && progress?.total>0)state.textContent+=' ('+progress.done+' / '+progress.total+')';
     if(job.error)state.textContent+=' · '+job.error;
-    if(job.status==='done')for(const [path,label] of [['report','Lire le rapport'],['html','Télécharger le rapport annoté'],['pdf','Télécharger le PDF'],['inspection','Preuves JSON']]){
-      const link=document.createElement('a');link.href='/jobs/'+job.id+'/'+path;link.textContent=label;if(path==='report')link.target='_blank';card.append(link);
+    if(job.status==='done')for(const [path,label] of [['report','Lire le rapport'],['document','Inspecter le CCTP original'],['document-html','Télécharger le CCTP inspecté'],['html','Télécharger le rapport annoté'],['pdf','Télécharger le PDF'],['inspection','Preuves JSON']]){
+      const link=document.createElement('a');link.href='/jobs/'+job.id+'/'+path;link.textContent=label;if(path==='report'||path==='document')link.target='_blank';card.append(link);
       if(focused===link.href)link.focus({preventScroll:true});
     }
     if(requested===job.id && !highlighted){card.scrollIntoView();highlighted=true;}
@@ -75,7 +75,7 @@ el('form').onsubmit=async e=>{e.preventDefault();const file=el('file').files[0];
 api('/models').then(names=>{if(names.length){el('model').replaceChildren(...names.map(n=>new Option(n,n)));if(names.includes('ministral-3:3b'))el('model').value='ministral-3:3b';}}).catch(e=>el('feedback').textContent=e.message);
 refresh();
 window.addEventListener('focus',refresh);
-const tour=[['demo','Cliquez ici pour analyser le PDF fictif avec les règles du 1er juillet 2024.'],['form','Pour votre propre essai, choisissez un fichier, indiquez le lieu et la date, puis lancez l’analyse.'],['reports','Quand le rapport est prêt, cliquez sur Lire le rapport. Survolez un passage encadré pour voir la règle et son lien.']];
+const tour=[['demo','Cliquez ici pour analyser le PDF fictif avec les règles du 1er juillet 2024.'],['form','Pour votre propre essai, choisissez un fichier, indiquez le lieu et la date, puis lancez l’analyse.'],['reports','Quand le rapport est prêt, cliquez sur Inspecter le CCTP original. Survolez un passage encadré pour voir la règle et son lien.']];
 let step=0;
 function closeGuide(){document.querySelector('.target')?.classList.remove('target');el('coach').hidden=true;el('guide').focus();}
 function showStep(){document.querySelector('.target')?.classList.remove('target');const [id,hint]=tour[step];el(id).classList.add('target');el(id).scrollIntoView({block:'center'});el('coach').hidden=false;el('step').textContent='Étape '+(step+1)+' sur '+tour.length;el('hint').textContent=hint;el('next').textContent=step===tour.length-1?'Terminer':'Suivant';el('next').focus({preventScroll:true});}
