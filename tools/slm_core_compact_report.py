@@ -7,7 +7,7 @@ import re
 from collections import Counter, OrderedDict
 from slm_v6_presentation import row_presentation
 
-LAYOUT_VERSION = 'SYNTHESE-7-DECISIONS'
+LAYOUT_VERSION = 'SYNTHESE-8-TAUX'
 ACTIONS = {
     'source_insuffisante': 'Rechercher le critère applicable à la clause dans une source datée.',
     'obligation_a_preciser': 'Identifier qui doit agir, sur quel ouvrage et sous quelles conditions.',
@@ -160,9 +160,17 @@ def sections(readings, analysis):
     if analysis.get('controle_juridique') is False:
         prose('Lecture seule : aucun contrôle juridique exécuté.')
     else:
-        blocks.append(('metrics', [(counts['ecarts'], 'Non conformes', 'fail'),
+        conformes = counts['respect']
+        total = conformes + counts['ecarts']
+        taux = f'{100 * conformes / total:.1f}'.removesuffix('.0').replace('.', ',') + ' %' if total else '—'
+        blocks.append(('metrics', [(taux, 'Taux de conformité des critères tranchés', 'info'),
+            (counts['ecarts'], 'Non conformes', 'fail'),
             (counts['respect'], 'Conformes', 'pass'),
             (counts['information'], 'Repères du dossier', 'neutral')]))
+        if total:
+            blocks.append(('note', f'Calcul du taux sur les seules décisions confirmées : {conformes} / {total}.'))
+        else:
+            blocks.append(('note', 'Taux non calculable. Aucun critère avec une décision confirmée.'))
     totals = [f"{len(items)} points recensés"]
     if counts['user_confirmations']: totals.append(f"{counts['user_confirmations']} déclaration(s) utilisateur distincte(s)")
     if counts['reading']: totals.append(f"{counts['reading']} passage(s) en lecture seule")

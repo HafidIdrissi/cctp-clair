@@ -18,7 +18,7 @@ import clair_model_choice as models
 from dila_local_store import DilaStore, DEFAULT_DB_PATH
 from clair_annotations import render
 from slm_source_display import source_display
-from slm_core_compact_report import criterion_reason
+from slm_core_compact_report import criterion_reason, html_report, pdf_report
 from slm_v6_presentation import row_presentation
 
 PORT = 8789
@@ -82,15 +82,17 @@ class App(BaseHTTPRequestHandler):
         if not match or match[1] not in core.STATES:return self.reply(404,{})
         if core.STATES[match[1]]['status']!='done':return self.reply(409,{'error':'Rapport en préparation.'})
         report=json.loads((core.JOBS/match[1]/'report.json').read_text(encoding='utf8'))
-        if match[2]=='pdf':return self.reply(200,base64.b64decode(report['pdf_base64']),'application/pdf','rapport.pdf')
         if match[2]=='inspection':return self.reply(200,report['preuves_json'],download='inspection.json')
         rows=[]
         analysis=report['preuves_json']['analyse']
+        readings=report['preuves_json']['lectures']
+        if match[2]=='pdf':return self.reply(200,pdf_report(readings,analysis),'application/pdf','rapport.pdf')
         for line in analysis['lignes']:
             fact=line.get('fait') or {}
             reason=criterion_reason(line,row_presentation(line,analysis)) or line.get('explication')
             rows.append(dict(id=fact.get('id'),page=fact.get('page'),quote=fact.get('citation_visible'),status=line.get('statut'),source_display=source_display(line),explanation=reason))
-        html=render(report['rapport_html'],{'findings':rows})
+        header,_,_=report['rapport_html'].partition('<body>')
+        html=render(header+'<body>'+html_report(readings,analysis)+'</body></html>',{'findings':rows})
         return self.reply(200,html,'text/html; charset=utf-8','rapport-annote.html' if match[2]=='html' else None)
 
     def do_POST(self):
