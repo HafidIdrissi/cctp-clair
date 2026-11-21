@@ -6,6 +6,8 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur vo
 
 **[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/)
 
+**Pour vos propres contrats, configurez votre accès PISTE** si vous voulez que CCTP Clair puisse chercher un article sur Légifrance quand les textes DILA de votre PC ne suffisent pas. Le premier exemple ci-dessous fonctionne avec les trois articles inclus. [Créer mon compte PISTE](https://piste.gouv.fr/registration) · [Configurer PISTE sur mon PC](#configurer-piste-sur-mon-pc)
+
 1. Faites un clic droit sur le ZIP → **Extraire tout**. Dans le dossier extrait, double-cliquez sur **Lancer CCTP Clair.cmd**.
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
 3. Dans **Mes rapports**, attendez **Rapport prêt**, puis cliquez sur **Lire le rapport**.
@@ -51,17 +53,19 @@ Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from Fil
 
 ![Parcours illustré : ouvrir le lanceur DILA, confirmer avec O et attendre la fin](guide/actualiser-dila.gif)
 
-**PISTE est facultatif.** Activez-le si vous souhaitez que le moteur recherche aussi des articles en ligne lorsque les sources locales sont insuffisantes. Le relais fourni utilise l’environnement de test (*sandbox*) et les quotas de votre application.
+### Configurer PISTE sur mon PC
 
-<details>
-<summary><strong>Activer PISTE sur mon PC Windows</strong></summary>
+**Sur le portail PISTE**
 
-![Parcours illustré : configurer le relais n8n et vérifier la connexion PISTE](guide/configurer-piste.gif)
+1. Créez un compte, activez-le puis connectez-vous. PISTE crée automatiquement votre application de test, appelée **sandbox**. [Créer mon compte PISTE](https://piste.gouv.fr/registration)
+2. Dans **API → Consentement CGU API**, recherchez **Légifrance** et validez les conditions demandées pour cette API. Dans **Applications**, ouvrez votre application **sandbox**, cliquez sur **Modifier l’application**, cochez **Légifrance** dans la liste des API et enregistrez. [Aide officielle Légifrance](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
+3. Dans cette application, ouvrez **API souscrites → Identifiants OAuth**. Gardez cet écran ouvert pour retrouver le **Client ID** et le **Client Secret**. Saisissez-les uniquement dans votre n8n local.
 
-1. Lancez CCTP Clair une première fois. Démarrez aussi n8n directement sur le même PC, sur le port 5678. [Installation locale de n8n](https://docs.n8n.io/hosting/installation/npm/)
-2. Créez votre compte PISTE. Dans votre espace, ouvrez votre application **sandbox**, accordez-lui l’accès à l’API **Légifrance** et acceptez les conditions demandées. Gardez son **Client ID** et son **Client Secret** pour l’étape 4. [Inscription PISTE](https://piste.gouv.fr/registration) · [Fiche officielle de l’API](https://www.data.gouv.fr/dataservices/legifrance)
-3. Dans le dossier extrait, double-cliquez sur **Configurer PISTE.cmd** et gardez la fenêtre ouverte. Dans n8n, créez un workflow vide, puis choisissez **⋯ → Import from File** et ouvrez [Relais PISTE sandbox.json](n8n/Relais%20PISTE%20sandbox.json). Dans le premier nœud **Rechercher un critère manquant**, créez un identifiant **Header Auth** et copiez les champs **Name** et **Value** affichés par l’assistant. Cette clé relie CCTP Clair à votre n8n.
-4. Dans le nœud **PISTE · recherche ou article**, créez un identifiant **OAuth2 API**. Choisissez **Client Credentials**, saisissez vos deux identifiants PISTE, puis renseignez les champs suivants.
+**Sur votre PC Windows**
+
+1. Lancez **Lancer CCTP Clair.cmd** une première fois, puis démarrez n8n sur le même PC. Dans le dossier du ZIP extrait, double-cliquez sur **Configurer PISTE.cmd** et laissez sa fenêtre ouverte. [Installer n8n](https://docs.n8n.io/hosting/installation/npm/) · [Ouvrir mon n8n local](http://localhost:5678/)
+2. Dans n8n, ouvrez un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez le fichier fourni dans le dossier **n8n**. Dans le nœud **Rechercher un critère manquant**, créez un identifiant **Header Auth** et recopiez **Name** et **Value** depuis la fenêtre **Configurer PISTE**. Cette clé relie CCTP Clair à n8n. [Fichier du workflow](n8n/Relais%20PISTE%20sandbox.json)
+3. Dans le nœud **PISTE · recherche ou article**, créez un identifiant **OAuth2 API**. Choisissez **Client Credentials**, copiez le **Client ID** et le **Client Secret** de votre application sandbox PISTE, puis complétez ces trois champs.
 
    | Champ dans n8n | Valeur |
    | --- | --- |
@@ -69,9 +73,13 @@ Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from Fil
    | Scope | `openid` |
    | Authentication | `Body` |
 
-5. Enregistrez les identifiants et **publiez ou activez le workflow**. Revenez à la fenêtre **Configurer PISTE** et appuyez sur **Entrée**. Le message **Article reçu** confirme qu’un article a été récupéré avec votre compte et active PISTE pour les prochaines analyses. Pour revenir au mode local, rouvrez le même assistant et confirmez avec **O**.
+4. Enregistrez les identifiants et **publiez ou activez le workflow**. Revenez dans **Configurer PISTE** et appuyez sur **Entrée**. Attendez **« Article reçu. PISTE est actif pour les prochaines analyses. »** Ce message confirme que le relais a récupéré un article avec votre compte. Gardez n8n en marche pendant les analyses qui utilisent PISTE.
 
-</details>
+Si le test échoue, vérifiez que n8n est ouvert, que le workflow est publié et que vos identifiants proviennent de l’application **sandbox** abonnée à Légifrance. Les appels utilisent le quota de cette application. [Dépanner un accès PISTE](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
+
+![Configurer le relais n8n et vérifier la connexion PISTE](guide/configurer-piste.gif)
+
+Pour revenir au mode local, rouvrez **Configurer PISTE.cmd** et confirmez avec **O**.
 
 ## Partie technique — comment fonctionne le SLM ?
 
