@@ -59,8 +59,24 @@ def test(pw):
     ctx=browser.new_context()
     page=ctx.new_page()
     page.set_default_timeout(10000)
-    request(ctx,'owner/setup',dict(email='mac-test@example.invalid',firstName='Test',lastName='Local',
-                                   password='Temporary8'+secrets.token_hex(10)))
+    for attempt in range(60):
+        settings=ctx.request.get(url+'/rest/settings')
+        if settings.ok and 'application/json' in settings.headers.get('content-type',''): break
+        time.sleep(2)
+    else:
+        raise RuntimeError('Le serveur répond sur /healthz mais son éditeur et ses réglages ne sont pas prêts.')
+    page.goto(url)
+    page.locator('input[type="email"],input[name="email"],input[autocomplete="email"]').first.wait_for(timeout=60000)
+    print('Page de premier démarrage :',page.url.split('?')[0],flush=True)
+    owner_data=dict(email='mac-test@example.invalid',firstName='Test',lastName='Local',
+                    password='Temporary8'+secrets.token_hex(10))
+    for field,hint in (('email','email'),('firstName','given-name'),('lastName','family-name'),('password','new-password')):
+        page.locator(f'input[autocomplete="{hint}"]').fill(owner_data[field])
+    with page.expect_response(lambda r: r.request.method=='POST' and '/owner/setup' in r.url) as submitted:
+        page.get_by_test_id('setup-form').get_by_role('button',name='Next').click()
+    if not submitted.value.ok:
+        raise RuntimeError(f'Création de compte via le formulaire HTTP {submitted.value.status}')
+    print('Compte de test local créé depuis le formulaire.',flush=True)
     try:
         open_ui(page,relay_file)
     except Exception as exc:
