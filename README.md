@@ -50,6 +50,8 @@ Dans **Votre document → Choisir le modèle local → Comparaison juridique**, 
 
 ## Tester depuis n8n
 
+**Où saisir mes clés PISTE ?** Dans le workflow **CCTP Clair - Relais PISTE sandbox**, ouvrez le troisième nœud **PISTE · recherche ou article**. Les champs **Client ID** et **Client Secret** se trouvent dans son identifiant **OAuth2 API**. [Suivre les étapes dans n8n](#saisir-les-clés-piste-dans-n8n)
+
 ![Workflow complet dans n8n, de la réception du CCTP à la remise du rapport, avec un zoom sur chaque étape](guide/workflow-n8n-complet.gif)
 
 **Voir le workflow complet.** Sur le PC de développement, [ouvrir le workflow SLM CCTP Clair dans n8n](http://localhost:5678/workflow/SlmCctpClairV1). Dans l’éditeur, utilisez **Zoom to fit** pour afficher les deux entrées (interface et formulaire), le contrôle du moteur, le suivi de l’analyse et la remise du rapport. L’OCR, la recherche DILA/PISTE et la comparaison juridique s’exécutent dans le moteur Python appelé par le workflow.
@@ -107,19 +109,22 @@ Pour les prochaines mises à jour de cet index, réutilisez la commande complèt
 2. Dans **API → Consentement CGU API**, recherchez **Légifrance** et validez les conditions demandées pour cette API. Dans **Applications**, ouvrez votre application **sandbox**, cliquez sur **Modifier l’application**, cochez **Légifrance** dans la liste des API et enregistrez. [Aide officielle Légifrance](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
 3. Dans cette application, ouvrez **API souscrites → Identifiants OAuth**. Gardez cet écran ouvert pour retrouver le **Client ID** et le **Client Secret**. Saisissez-les uniquement dans votre n8n local.
 
-**Sur votre Mac ou PC Windows**
+### Saisir les clés PISTE dans n8n
 
-1. Lancez CCTP Clair une première fois, puis démarrez n8n sur le même ordinateur. Dans le dossier du ZIP extrait, double-cliquez sur **Configurer PISTE.command** (Mac) ou **Configurer PISTE.cmd** (Windows) et laissez sa fenêtre ouverte. [Installer n8n](https://docs.n8n.io/hosting/installation/npm/) · [Ouvrir mon n8n local](http://localhost:5678/)
-2. Dans n8n, ouvrez un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez le fichier fourni dans le dossier **n8n**. Dans le nœud **Rechercher un critère manquant**, créez un identifiant **Header Auth** et recopiez **Name** et **Value** depuis la fenêtre **Configurer PISTE**. Cette clé relie CCTP Clair à n8n. [Fichier du workflow](n8n/Relais%20PISTE%20sandbox.json)
-3. Dans le nœud **PISTE · recherche ou article**, créez un identifiant **OAuth2 API**. Choisissez **Client Credentials**, copiez le **Client ID** et le **Client Secret** de votre application sandbox PISTE, puis complétez ces trois champs.
+1. **Ouvrez le relais.** Après le premier lancement de CCTP Clair, démarrez n8n sur le même ordinateur. Dans le dossier extrait, double-cliquez sur **Configurer PISTE.command** (Mac) ou **Configurer PISTE.cmd** (Windows). Laissez sa fenêtre ouverte. Dans votre n8n local, créez un workflow vide, cliquez sur **⋯ → Import from File** et choisissez **n8n/Relais PISTE sandbox.json**. Quatre nœuds apparaissent. [Ouvrir mon n8n local](http://localhost:5678/) · [Installer n8n](https://docs.n8n.io/hosting/installation/npm/) · [Fichier du relais](n8n/Relais%20PISTE%20sandbox.json)
+2. **Reliez CCTP Clair à n8n.** Double-cliquez sur le **premier nœud à gauche, « Rechercher un critère manquant »**. Dans **Parameters**, sous **Authentication → Header Auth**, ouvrez la liste des identifiants et choisissez **Create new credential**. Dans **Name** et **Value**, recopiez les deux valeurs affichées par la fenêtre **Configurer PISTE** sur votre ordinateur. Cliquez sur **Save**, puis revenez au workflow.
+3. **Saisissez vos clés du portail PISTE.** Double-cliquez sur le **troisième nœud en partant de la gauche, « PISTE · recherche ou article »**. Dans **Parameters**, vous trouverez **Authentication → Generic Credential Type**, puis **Generic Auth Type → OAuth2 API**. Juste en dessous, ouvrez la liste des identifiants et cliquez sur **Create new credential**. Dans l’onglet **Connection**, remplissez ces champs. [Aide n8n sur la création d’un identifiant](https://docs.n8n.io/credentials/add-edit-credentials/)
 
-   | Champ dans n8n | Valeur |
+   | Champ dans n8n | Valeur à saisir |
    | --- | --- |
-   | Access Token URL | `https://sandbox-oauth.piste.gouv.fr/api/oauth/token` |
-   | Scope | `openid` |
-   | Authentication | `Body` |
+   | **Grant Type** | Choisissez **Client Credentials**. |
+   | **Access Token URL** | `https://sandbox-oauth.piste.gouv.fr/api/oauth/token` |
+   | **Client ID** | Collez le **Client ID** de votre application **sandbox** sur le portail PISTE. |
+   | **Client Secret** | Collez le **Client Secret** de cette même application dans le champ masqué. |
+   | **Scope** | `openid` |
+   | **Authentication** | Choisissez **Body**. |
 
-4. Enregistrez les identifiants et **publiez ou activez le workflow**. Revenez dans **Configurer PISTE** et appuyez sur **Entrée**. Attendez **« Article reçu. PISTE est actif pour les prochaines analyses. »** Ce message confirme que le relais a récupéré un article avec votre compte. Gardez n8n en marche pendant les analyses qui utilisent PISTE.
+4. **Enregistrez et vérifiez.** Cliquez sur **Save**, vérifiez que l’identifiant enregistré est sélectionné dans le troisième nœud, puis revenez au workflow et cliquez sur **Publish** (ou activez **Active**, selon votre version de n8n). Revenez dans la fenêtre **Configurer PISTE** et appuyez sur **Entrée**. Le message **« Article reçu. PISTE est actif pour les prochaines analyses. »** confirme un appel réussi avec votre compte. Gardez n8n ouvert pendant les analyses qui utilisent PISTE.
 
 Si le test échoue, vérifiez que n8n est ouvert, que le workflow est publié et que vos identifiants proviennent de l’application **sandbox** abonnée à Légifrance. Les appels utilisent le quota de cette application. [Dépanner un accès PISTE](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
 
