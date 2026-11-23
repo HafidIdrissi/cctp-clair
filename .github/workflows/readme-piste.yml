@@ -1,0 +1,50 @@
+name: Vérification du relais PISTE sur Mac
+on:
+  push:
+    branches: [qa/mac-piste-132]
+permissions:
+  contents: read
+jobs:
+  relais:
+    runs-on: macos-15
+    timeout-minutes: 35
+    env:
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_VERSION_NOTIFICATIONS_ENABLED: 'false'
+      N8N_LISTEN_ADDRESS: '127.0.0.1'
+      N8N_PERSONALIZATION_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Installer le ZIP distribué et n8n sur le Mac
+        shell: bash
+        run: |
+          set -eu
+          curl -fsSL --retry 3 https://github.com/HafidIdrissi/cctp-clair/releases/download/v1.3.2/CCTP-Clair-Mac.zip -o "$RUNNER_TEMP/cctp.zip"
+          ditto -x -k "$RUNNER_TEMP/cctp.zip" "$RUNNER_TEMP/essai"
+          cd "$RUNNER_TEMP/essai/CCTP Clair"
+          echo "APP=$PWD" >> "$GITHUB_ENV"
+          echo "PY=$PWD/local/macos/python-3.11.18/python/bin/python3.11" >> "$GITHUB_ENV"
+          "./Lancer CCTP Clair.command" > "$RUNNER_TEMP/launcher.log" 2>&1 &
+          npm install -g n8n --no-audit --no-fund
+          n8n --version
+          n8n start > "$RUNNER_TEMP/n8n.log" 2>&1 &
+          for ((i=0;i<180;i++)); do
+            if curl -fsS --max-time 2 http://127.0.0.1:5678/healthz 2>/dev/null && curl -fsS --max-time 2 http://127.0.0.1:8789/health 2>/dev/null; then break; fi
+            sleep 4
+          done
+          curl -fsS http://127.0.0.1:5678/healthz
+          curl -fsS http://127.0.0.1:8789/health
+          local/macos/python-3.11.18/python/bin/python3.11 -m pip install playwright
+      - name: Vérifier les écrans n8n et tester le relais de production local
+        env:
+          PISTE_TEST_ID: ${{ secrets.PISTE_SANDBOX_CLIENT_ID }}
+          PISTE_TEST_SECRET: ${{ secrets.PISTE_SANDBOX_CLIENT_SECRET }}
+        shell: bash
+        run: |
+          cd "$APP"
+          "$PY" "$GITHUB_WORKSPACE/tests/piste_mac.py"
