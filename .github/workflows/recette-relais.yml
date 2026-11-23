@@ -1,0 +1,31 @@
+name: Essai isolé du relais avec fournisseur simulé
+on:
+  push:
+    branches: [qa/piste-actions-integration]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: npm install -g n8n@2.48.8 --no-audit --no-fund
+      - run: python -m pip install -r requirements.txt
+      - name: Vérifier le véritable n8n avec des valeurs fictives et deux routes locales
+        env:
+          PISTE_SANDBOX_CLIENT_ID: qa-only-client
+          PISTE_SANDBOX_CLIENT_SECRET: qa-only-demo
+        run: |
+          sed -i 's#https://sandbox-oauth.piste.gouv.fr/api/oauth/token#http://127.0.0.1:5689/token#g' .github/scripts/test_piste.py
+          sed -i 's#https://sandbox-api.piste.gouv.fr/dila/legifrance/lf-engine-app#http://127.0.0.1:5689#g' 'n8n/Relais PISTE sandbox.json'
+          python .github/scripts/provider_fixture.py &
+          python .github/scripts/test_piste.py
