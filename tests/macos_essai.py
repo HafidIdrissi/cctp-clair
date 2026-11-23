@@ -46,8 +46,10 @@ def fetch(path, data=None):
 
 
 def check_demo():
+    name = 'CCTP_Rennes_liaison_cyclable_B_avec_defauts_4_pages.pdf'
+    assert fetch('/exemple.pdf') == (Path('demo/contrats') / name).read_bytes()
     job = json.loads(fetch('/jobs', b'{"demo":true}'))['id']
-    deadline = time.monotonic() + 1200
+    deadline = time.monotonic() + 3 * 3600
     while time.monotonic() < deadline:
         state = next(row for row in json.loads(fetch('/jobs')) if row['id'] == job)
         if state['status'] == 'done':
@@ -57,7 +59,8 @@ def check_demo():
     else:
         raise TimeoutError(state)
     prefix = '/jobs/' + job
-    assert re.search(r'50\s*%', fetch(prefix + '/report').decode()), 'Pourcentage attendu de 50 %'
+    assert state['filename'] == name, state
+    assert 'Taux de conformité des critères tranchés' in fetch(prefix + '/report').decode()
     assert fetch(prefix + '/pdf').startswith(b'%PDF-')
     report = fetch(prefix + '/document-html').decode()
     assert 'data:image/jpeg;' in report and 'https://www.legifrance.gouv.fr/' in report

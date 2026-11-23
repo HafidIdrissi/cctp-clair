@@ -24,7 +24,7 @@ from slm_v6_presentation import row_presentation
 
 PORT = 8789
 RUNTIME = ROOT / 'local'
-DEMO = ROOT / 'demo' / 'Exemple.pdf'
+DEMO = ROOT / 'demo' / 'contrats' / 'CCTP_Rennes_liaison_cyclable_B_avec_defauts_4_pages.pdf'
 
 
 def initialize():
@@ -68,7 +68,7 @@ class App(BaseHTTPRequestHandler):
     def do_GET(self):
         if not self.local():return self.reply(403,{'error':'Accès local uniquement.'})
         path=urlsplit(self.path).path
-        assets={'/':('interface/index.html','text/html; charset=utf-8'),'/app.js':('interface/app.js','text/javascript; charset=utf-8'),'/style.css':('interface/style.css','text/css'),'/exemple.pdf':('demo/Exemple.pdf','application/pdf')}
+        assets={'/':('interface/index.html','text/html; charset=utf-8'),'/app.js':('interface/app.js','text/javascript; charset=utf-8'),'/style.css':('interface/style.css','text/css'),'/exemple.pdf':(DEMO,'application/pdf')}
         if path in assets:
             file,mime=assets[path]
             return self.reply(200,(ROOT/file).read_bytes(),mime)
@@ -113,7 +113,7 @@ class App(BaseHTTPRequestHandler):
             if not 0<length<36_000_000:raise ValueError('Fichier trop volumineux (25 Mo maximum).')
             self.connection.settimeout(40)
             data=json.loads(self.rfile.read(length))
-            if data.get('demo'): filename,encoded,city,date=DEMO.name,base64.b64encode(DEMO.read_bytes()).decode(),'Projet fictif','2024-07-01'
+            if data.get('demo'): filename,encoded,city,date=DEMO.name,base64.b64encode(DEMO.read_bytes()).decode(),'Rennes','2024-07-01'
             else: filename,encoded,city,date=data['filename'],data['file_base64'],data['city'],data['date']
             if Path(filename).suffix.lower() not in ('.pdf','.jpg','.jpeg','.png'):raise ValueError('Choisissez un PDF ou une image.')
             state=core.submit(dict(filename=filename,file_base64=encoded,execution_id=str(10**14+randbelow(9*10**14)),

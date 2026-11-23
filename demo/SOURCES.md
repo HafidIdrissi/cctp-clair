@@ -1,6 +1,6 @@
 # Sources de la démonstration
 
-Exemple.pdf est un document fictif créé pour ce dépôt.
+Le dossier [contrats](contrats) contient les deux versions fictives de Rennes, le CCTP fictif de Nantes et le CCTP original de Tain-l’Hermitage. Le bouton « Tester avec l’exemple » utilise la version B de Rennes.
 
 Les trois XML du dossier legi proviennent du fonds LEGI diffusé par la Direction de l’information légale et administrative (DILA). Archive Freemium_legi_global_20250713-140000.tar.gz du 13 juillet 2025. Les fichiers sont conservés dans leur version extraite. [Répertoire officiel](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
 

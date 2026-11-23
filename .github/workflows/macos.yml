@@ -8,6 +8,7 @@ on:
       - 'tools/**'
       - 'requirements.txt'
       - 'clair.py'
+      - 'demo/contrats/**'
       - '.github/workflows/macos.yml'
       - 'tests/macos_essai.py'
 permissions:
@@ -19,7 +20,7 @@ jobs:
       matrix:
         runner: [macos-15, macos-15-intel]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 45
+    timeout-minutes: 200
     steps:
       - uses: actions/checkout@v4
       - name: Installer et analyser depuis le ZIP public

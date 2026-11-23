@@ -12,9 +12,9 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur Wi
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
 3. Dans **Mes rapports**, attendez **Rapport prêt**, puis cliquez sur **Lire le rapport**.
 
-Pour vérifier le premier essai, cherchez deux passages du PDF fictif dans le rapport. La **largeur libre de 1,10 m** doit apparaître en **rouge (non conforme)** et la **fente de grille de 1,5 cm** en **vert (conforme)**. Survolez un passage ou sélectionnez-le au clavier pour lire la raison et ouvrir l’article sur Légifrance. L’exemple utilise les textes DILA inclus, à la date du 1er juillet 2024.
+Le bouton analyse **Rennes B avec défauts**, un CCTP fictif de quatre pages, avec les textes DILA inclus au **1er juillet 2024**. Dans **Inspecter le CCTP original**, cherchez la **largeur libre de 1,10 m** et la **pente longitudinale de 1,00 %** sur le plan de la page 2. Survolez les passages encadrés pour lire le motif et ouvrir l’article sur Légifrance.
 
-Le rapport de cet exemple affiche **50 %** : un critère conforme sur deux critères avec une décision confirmée. Seuls les critères déclarés conformes ou non conformes entrent dans le calcul.
+Le taux affiché dépend des critères tranchés pendant l’analyse. Il correspond au nombre de critères conformes divisé par le nombre de critères ayant reçu un verdict.
 
 ![Du bouton Tester avec l’exemple à la lecture du rapport](guide/premier-essai.gif)
 
@@ -36,10 +36,11 @@ Sur ce plan de Rennes (page 2), la **largeur libre de 1,10 m** est encadrée en 
 
 **Télécharger le CCTP inspecté** enregistre les pages et leurs annotations dans un fichier HTML à rouvrir hors ligne. Les passages dont la position reste incertaine sont listés à la fin.
 
-## Refaire les essais avec les contrats fictifs
+## Les quatre contrats disponibles
 
 - **Rennes, 4 pages.** Analysez les deux versions au **1er juillet 2024**, avec le même modèle. Page 2, la largeur piétonne passe de **1,10 m** à **1,60 m**. Comparez les justifications dans les rapports. [Version B avec défauts](demo/contrats/CCTP_Rennes_liaison_cyclable_B_avec_defauts_4_pages.pdf) · [Version A corrigée](demo/contrats/CCTP_Rennes_liaison_cyclable_A_version_corrigee_4_pages.pdf) · [Clé de lecture](demo/contrats/Rennes-cle-de-test.md)
-- **Nantes, 12 pages.** À la même date, vérifiez les cotes lues dans les plans des pages 7 à 11. [PDF de Nantes](demo/contrats/CCTP_fictif_Nantes_piste_cyclable_images.pdf) · [Tous les contrats fictifs](demo/contrats)
+- **Nantes, 12 pages.** À la même date, vérifiez les cotes lues dans les plans des pages 7 à 11. [CCTP fictif de Nantes](demo/contrats/CCTP_fictif_Nantes_piste_cyclable_images.pdf)
+- **Tain-l’Hermitage, 27 pages.** Ce CCTP original porte sur la maîtrise d’œuvre pour la requalification de trois rues. Pour l’analyser avec la limite actuelle de 15 pages par envoi, ouvrez le PDF puis imprimez les pages 1 à 15 et 16 à 27 dans deux PDF distincts. Chaque envoi produit son propre rapport. [CCTP original de Tain-l’Hermitage](demo/contrats/CCTP_Tain_LHermitage_2024_original.pdf)
 
 ## Changer de modèle Ollama
 
