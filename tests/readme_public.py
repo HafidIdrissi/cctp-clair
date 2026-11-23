@@ -3,6 +3,7 @@ import json
 import os
 import re
 import time
+from collections import Counter
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -56,6 +57,8 @@ def verify(page):
         job = jobs[0]['id']
     elif case == 'rennes-a':
         job = upload(page, first('*Rennes*A_version*'), 'Rennes')
+    elif case == 'plan-rennes':
+        job = upload(page, split_pdf(first('*Rennes*B_avec*'),2,2), 'Rennes')
     elif case == 'nantes':
         job = upload(page, first('*Nantes*'), 'Nantes')
     elif case.startswith('tain'):
@@ -98,6 +101,21 @@ def verify(page):
     text=pop.value.locator('body').inner_text()
     assert 'Taux de conformité' in text
     print('Synthèse du contrat de test :',text[:1500],flush=True)
+    if case=='plan-rennes':
+        proof=page.request.get(origin+'/jobs/'+job+'/inspection').json()
+        for p in proof['lectures'].get('pages_visuelles',[]):
+            ocr=p.get('ocr',{})
+            print('OCR',ocr.get('engine'),'vision',p.get('statut'),p.get('erreur'),flush=True)
+            for line in ocr.get('lines',[]):
+                if re.search(r'1[.,]10|1[.,]00|largeur|pente|4[.,]50',line,re.I):
+                    print('Lecture du plan fictif',line,flush=True)
+        analysis=proof['analyse']
+        for row in analysis.get('lignes',[]):
+            fact=row.get('fait',{})
+            if fact.get('type_fait') not in ('clause_a_examiner',None):
+                print('Contrôle',fact.get('type_fait'),row.get('statut'),str(row.get('explication',''))[:260])
+        calls=analysis.get('verification_articles',{}).get('exchanges',[])
+        print('Appels des modèles',Counter((e.get('stage'),e.get('status'),e.get('error')) for e in calls if isinstance(e,dict)),flush=True)
     with page.expect_popup() as source:
         page.get_by_text('Inspecter le CCTP original',exact=True).click()
     doc=source.value

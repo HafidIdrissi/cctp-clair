@@ -1,7 +1,7 @@
 name: Parcours du ZIP public sur Mac
 on:
   push:
-    branches: [qa/mac-export-132]
+    branches: [qa/mac-plan-rennes-132]
 permissions:
   contents: read
 jobs:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parcours: [export]
+        parcours: [plan-rennes]
     runs-on: macos-15
     timeout-minutes: 340
     env:
