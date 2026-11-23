@@ -6,7 +6,7 @@ CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur Wi
 
 **[Télécharger pour MacBook](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Mac.zip)** · **[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/)
 
-**Pour vos propres contrats, configurez votre accès PISTE** si vous voulez que CCTP Clair puisse chercher un article sur Légifrance quand les textes DILA de votre PC ne suffisent pas. Le premier exemple ci-dessous fonctionne avec les trois articles inclus. [Créer mon compte PISTE](https://piste.gouv.fr/registration) · [Configurer PISTE sur mon PC](#configurer-piste-sur-mon-pc)
+**Pour tester Rennes**, les trois articles DILA du ZIP suffisent pour démarrer. **Pour votre propre contrat**, vous pouvez enrichir la base locale ou configurer PISTE pour rechercher en ligne un article manquant. [Choisir les textes à installer](#dila-et-api-légifrance-via-piste) · [Configurer PISTE](#configurer-piste-sur-mon-pc)
 
 1. **Sur Mac**, dans le Finder, double-cliquez sur le ZIP. Placez le dossier extrait dans **Documents**, puis double-cliquez sur **Lancer CCTP Clair.command**. **Sur Windows**, faites un clic droit sur le ZIP → **Extraire tout**, puis double-cliquez sur **Lancer CCTP Clair.cmd**.
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
@@ -66,9 +66,38 @@ Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from Fil
 
 ## DILA et API Légifrance via PISTE
 
-**DILA fonctionne dès le premier essai.** Les trois articles XML fournis sont indexés sur votre ordinateur au démarrage, sans compte. Pour ajouter les textes de mobilité, terminez les analyses en cours et double-cliquez sur **Actualiser les textes DILA.command** (Mac) ou **Actualiser les textes DILA.cmd** (Windows). Tapez **O** et appuyez sur Entrée. Attendez la confirmation de mise à jour avant de lancer un nouveau contrôle. Prévoyez Internet et plusieurs Go libres. [Voir les XML inclus](demo/legi) · [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
+| Votre besoin | Textes disponibles sur votre ordinateur |
+| --- | --- |
+| **Tester Rennes B** | Le ZIP contient trois articles de voirie et d’accessibilité, chargés au premier lancement. Vous pouvez ainsi essayer l’outil sans télécharger plusieurs Go d’archives juridiques. [Voir les trois XML](demo/legi) |
+| **Analyser un autre CCTP de voirie** | Le lanceur **Actualiser les textes DILA** télécharge les archives LEGI et leurs mises à jour. Il indexe une sélection couvrant notamment la voirie, les transports, la commande publique et l’accessibilité. |
+| **Rechercher aussi dans d’autres domaines** | Le mode avancé **LEGI complet** importe les articles du fonds LEGI sans filtre par titre. Il s’utilise en ligne de commande. |
+
+**Pour installer la sélection voirie**, lancez CCTP Clair une première fois et attendez la fin des analyses en cours. Dans le dossier extrait, double-cliquez sur **Actualiser les textes DILA.command** (Mac) ou **Actualiser les textes DILA.cmd** (Windows), confirmez avec **O** et attendez le message de fin. Prévoyez Internet et plusieurs Go libres. Aucun compte PISTE n’est nécessaire. [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
 
 ![Parcours illustré : ouvrir le lanceur DILA, confirmer avec O et attendre la fin](guide/actualiser-dila.gif)
+
+<details>
+<summary><strong>Importer le fonds LEGI complet sur Windows ou Mac</strong></summary>
+
+Sur une installation neuve, lancez CCTP Clair une première fois, puis ouvrez un terminal dans le dossier qui contient le lanceur. Choisissez cette commande dès le départ si vous souhaitez un index complet. L’import demande davantage d’espace et de temps que la sélection voirie.
+
+**Windows — PowerShell**
+
+```powershell
+.\.venv\Scripts\python.exe -B tools\sync_dila_local.py --scope all --with-deltas
+```
+
+**Mac — Terminal**
+
+```bash
+SSL_CERT_FILE=/etc/ssl/cert.pem ./local/macos/python-3.11.18/python/bin/python3.11 -B tools/sync_dila_local.py --scope all --with-deltas
+```
+
+Pour les prochaines mises à jour de cet index, réutilisez la commande complète. Le lanceur par double-clic utilise la sélection voirie. L’import complet sur une installation neuve reste à valider de bout en bout.
+
+</details>
+
+**Comment lire le résultat sur un autre contrat ?** Si le rapport affiche **0 conforme et 0 non conforme**, aucun critère n’a reçu de verdict. Même avec davantage de textes disponibles, il faut un passage exploitable et une règle applicable à la date choisie pour conclure. PISTE peut compléter la recherche lorsqu’un article manque dans la base locale.
 
 ### Configurer PISTE sur mon PC
 
