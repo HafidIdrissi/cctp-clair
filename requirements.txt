@@ -2,3 +2,4 @@ pypdf==6.7.3
 Pillow==11.1.0
 reportlab==4.4.7
 PyMuPDF==1.26.7
+pyobjc-framework-Vision==11.1; sys_platform == "darwin"

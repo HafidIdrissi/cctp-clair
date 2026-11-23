@@ -1,14 +1,14 @@
 # CCTP Clair
 
-CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur votre PC. Pour chaque critère contrôlé, le rapport montre le passage du contrat, l’article utilisé et la raison du verdict.
+CCTP Clair analyse un cahier des clauses techniques particulières (CCTP) sur Windows ou Mac. Pour chaque critère contrôlé, le rapport montre le passage du contrat, l’article utilisé et la raison du verdict.
 
 ## Tester le SLM maintenant
 
-**[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/)
+**[Télécharger pour MacBook](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Mac.zip)** · **[Télécharger pour Windows](https://github.com/HafidIdrissi/cctp-clair/releases/latest/download/CCTP-Clair-Windows.zip)** · [Ouvrir CCTP Clair s’il est déjà lancé](http://127.0.0.1:8789/)
 
 **Pour vos propres contrats, configurez votre accès PISTE** si vous voulez que CCTP Clair puisse chercher un article sur Légifrance quand les textes DILA de votre PC ne suffisent pas. Le premier exemple ci-dessous fonctionne avec les trois articles inclus. [Créer mon compte PISTE](https://piste.gouv.fr/registration) · [Configurer PISTE sur mon PC](#configurer-piste-sur-mon-pc)
 
-1. Faites un clic droit sur le ZIP → **Extraire tout**. Dans le dossier extrait, double-cliquez sur **Lancer CCTP Clair.cmd**.
+1. **Sur Mac**, dans le Finder, double-cliquez sur le ZIP. Placez le dossier extrait dans **Documents**, puis double-cliquez sur **Lancer CCTP Clair.command**. **Sur Windows**, faites un clic droit sur le ZIP → **Extraire tout**, puis double-cliquez sur **Lancer CCTP Clair.cmd**.
 2. Gardez la fenêtre ouverte. Quand le navigateur s’ouvre, cliquez sur **Tester avec l’exemple**.
 3. Dans **Mes rapports**, attendez **Rapport prêt**, puis cliquez sur **Lire le rapport**.
 
@@ -18,7 +18,9 @@ Le rapport de cet exemple affiche **50 %** : un critère conforme sur deux crit�
 
 ![Du bouton Tester avec l’exemple à la lecture du rapport](guide/premier-essai.gif)
 
-Le premier lancement nécessite Windows 10 ou 11 (64 bits), Internet et plusieurs Go libres. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.
+Le premier lancement nécessite Internet et plusieurs Go libres. Sur **macOS Sonoma 14 ou ultérieur**, le lanceur prépare Python, Ollama et le modèle local Ministral 3B. Gardez le Terminal ouvert pendant le téléchargement et l’analyse. Les Mac à puce Apple peuvent accélérer le modèle sur le GPU. Sur Mac Intel, le calcul utilise le processeur et peut prendre davantage de temps. Si macOS bloque le lanceur téléchargé depuis cette page, utilisez **Réglages Système → Confidentialité et sécurité → Ouvrir quand même** après la première tentative. [Configuration Mac d’Ollama](https://docs.ollama.com/macos)
+
+Sur **Windows 10 ou 11 (64 bits)** comme sur Mac, le premier exemple fonctionne sans installer n8n ni créer de compte PISTE. Pour tester votre propre contrat, choisissez un fichier, indiquez le lieu et la date, puis cliquez sur **Lancer l’analyse**. Formats acceptés : PDF (15 pages maximum), PNG ou JPEG, jusqu’à 25 Mo.
 
 **Guides animés** · [Voir les annotations](#voir-les-annotations-sur-le-cctp) · [Changer de modèle Ollama](#changer-de-modèle-ollama) · [Utiliser n8n](#tester-depuis-n8n)
 
@@ -43,7 +45,7 @@ Sur ce plan de Rennes (page 2), la **largeur libre de 1,10 m** est encadrée en 
 
 ![Ouvrir « Choisir le modèle local » et sélectionner un modèle Ollama](guide/changer-modele.gif)
 
-Dans **Votre document → Choisir le modèle local → Comparaison juridique**, sélectionnez un modèle puis lancez l’essai. Pour en ajouter un, ouvrez **PowerShell**, tapez par exemple `ollama pull qwen3:4b`, puis actualisez la page avec **F5**. La lecture des images utilise Ministral 3B.
+Dans **Votre document → Choisir le modèle local → Comparaison juridique**, sélectionnez un modèle puis lancez l’essai. Pour en ajouter un sur Windows, ouvrez **PowerShell** et tapez par exemple `ollama pull qwen3:4b`. Sur Mac, gardez CCTP Clair ouvert et tapez dans une nouvelle fenêtre de **Terminal** `curl -f http://127.0.0.1:11434/api/pull -d '{"model":"qwen3:4b"}'`. Quand le téléchargement se termine, actualisez la page. La lecture des images utilise Ministral 3B.
 
 ## Tester depuis n8n
 
@@ -57,13 +59,13 @@ Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from Fil
 
 [Voir le GIF du test rapide à deux nœuds](guide/tester-n8n.gif)
 
-1. Lancez CCTP Clair et [ouvrez n8n](http://localhost:5678/) sur le même PC Windows. Ce workflow utilise une installation locale de n8n.
+1. Lancez CCTP Clair et [ouvrez n8n](http://localhost:5678/) sur le même ordinateur. Ce workflow utilise une installation locale de n8n.
 2. Dans un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez [Tester CCTP Clair.json](n8n/Tester%20CCTP%20Clair.json) dans le dossier **n8n** du ZIP extrait.
 3. Cliquez sur **Execute workflow**. Dans **Analyser le PDF fictif → Output**, ouvrez le lien `url` pour suivre l’analyse et lire le rapport.
 
 ## DILA et API Légifrance via PISTE
 
-**DILA fonctionne dès le premier essai.** Les trois articles XML fournis sont indexés sur votre PC au démarrage, sans compte. Pour ajouter les textes de mobilité, terminez les analyses en cours, double-cliquez sur **Actualiser les textes DILA.cmd**, puis appuyez sur **O** pour confirmer. Attendez le message **Index local mis a jour** avant de lancer un nouveau contrôle. Prévoyez Internet et plusieurs Go libres. [Voir les XML inclus](demo/legi) · [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
+**DILA fonctionne dès le premier essai.** Les trois articles XML fournis sont indexés sur votre ordinateur au démarrage, sans compte. Pour ajouter les textes de mobilité, terminez les analyses en cours et double-cliquez sur **Actualiser les textes DILA.command** (Mac) ou **Actualiser les textes DILA.cmd** (Windows). Tapez **O** et appuyez sur Entrée. Attendez la confirmation de mise à jour avant de lancer un nouveau contrôle. Prévoyez Internet et plusieurs Go libres. [Voir les XML inclus](demo/legi) · [Archives officielles DILA](https://echanges.dila.gouv.fr/OPENDATA/LEGI/)
 
 ![Parcours illustré : ouvrir le lanceur DILA, confirmer avec O et attendre la fin](guide/actualiser-dila.gif)
 
@@ -75,9 +77,9 @@ Sur un autre PC, ouvrez un workflow vide et choisissez **⋯ → Import from Fil
 2. Dans **API → Consentement CGU API**, recherchez **Légifrance** et validez les conditions demandées pour cette API. Dans **Applications**, ouvrez votre application **sandbox**, cliquez sur **Modifier l’application**, cochez **Légifrance** dans la liste des API et enregistrez. [Aide officielle Légifrance](https://www.legifrance.gouv.fr/contenu/pied-de-page/foire-aux-questions-api)
 3. Dans cette application, ouvrez **API souscrites → Identifiants OAuth**. Gardez cet écran ouvert pour retrouver le **Client ID** et le **Client Secret**. Saisissez-les uniquement dans votre n8n local.
 
-**Sur votre PC Windows**
+**Sur votre Mac ou PC Windows**
 
-1. Lancez **Lancer CCTP Clair.cmd** une première fois, puis démarrez n8n sur le même PC. Dans le dossier du ZIP extrait, double-cliquez sur **Configurer PISTE.cmd** et laissez sa fenêtre ouverte. [Installer n8n](https://docs.n8n.io/hosting/installation/npm/) · [Ouvrir mon n8n local](http://localhost:5678/)
+1. Lancez CCTP Clair une première fois, puis démarrez n8n sur le même ordinateur. Dans le dossier du ZIP extrait, double-cliquez sur **Configurer PISTE.command** (Mac) ou **Configurer PISTE.cmd** (Windows) et laissez sa fenêtre ouverte. [Installer n8n](https://docs.n8n.io/hosting/installation/npm/) · [Ouvrir mon n8n local](http://localhost:5678/)
 2. Dans n8n, ouvrez un workflow vide, cliquez sur **⋯ → Import from File** et sélectionnez le fichier fourni dans le dossier **n8n**. Dans le nœud **Rechercher un critère manquant**, créez un identifiant **Header Auth** et recopiez **Name** et **Value** depuis la fenêtre **Configurer PISTE**. Cette clé relie CCTP Clair à n8n. [Fichier du workflow](n8n/Relais%20PISTE%20sandbox.json)
 3. Dans le nœud **PISTE · recherche ou article**, créez un identifiant **OAuth2 API**. Choisissez **Client Credentials**, copiez le **Client ID** et le **Client Secret** de votre application sandbox PISTE, puis complétez ces trois champs.
 
@@ -93,7 +95,7 @@ Si le test échoue, vérifiez que n8n est ouvert, que le workflow est publié et
 
 ![Configurer le relais n8n et vérifier la connexion PISTE](guide/configurer-piste.gif)
 
-Pour revenir au mode local, rouvrez **Configurer PISTE.cmd** et confirmez avec **O**.
+Pour revenir au mode local, rouvrez le même lanceur **Configurer PISTE** et confirmez avec **O**.
 
 ## Partie technique — comment fonctionne le SLM ?
 

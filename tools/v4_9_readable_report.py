@@ -2,6 +2,7 @@
 import base64
 import io
 import re
+from pathlib import Path
 from collections import Counter
 from datetime import datetime
 from html import escape
@@ -343,8 +344,13 @@ def conclusion_kinds_text(counts):
 
 def styles():
     if 'CctpArial' not in pdfmetrics.getRegisteredFontNames():
-        pdfmetrics.registerFont(TTFont('CctpArial', 'C:/Windows/Fonts/arial.ttf'))
-        pdfmetrics.registerFont(TTFont('CctpArialBold', 'C:/Windows/Fonts/arialbd.ttf'))
+        regular, bold = Path('C:/Windows/Fonts/arial.ttf'), Path('C:/Windows/Fonts/arialbd.ttf')
+        if not (regular.is_file() and bold.is_file()):
+            import reportlab
+            folder = Path(reportlab.__file__).parent / 'fonts'
+            regular, bold = folder/'Vera.ttf', folder/'VeraBd.ttf'
+        pdfmetrics.registerFont(TTFont('CctpArial', str(regular)))
+        pdfmetrics.registerFont(TTFont('CctpArialBold', str(bold)))
         pdfmetrics.registerFontFamily('CctpArial', normal='CctpArial', bold='CctpArialBold', italic='CctpArial', boldItalic='CctpArialBold')
     body = ParagraphStyle('Text', fontName='CctpArial', fontSize=12, leading=18,
                           textColor=colors.HexColor(INK), spaceAfter=8, splitLongWords=True)

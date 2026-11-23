@@ -11,6 +11,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 import tempfile
 import threading
 import unicodedata
@@ -66,6 +67,9 @@ def img_bytes(image, size=2048, fmt='JPEG'):
     return buffer.getvalue()
 
 def ocr(paths, temp):
+    if sys.platform == 'darwin':
+        from macos_ocr import recognize
+        return [recognize(path) for path in paths]
     listing = temp / 'ocr_paths.json'
     listing.write_text(json.dumps([str(p.resolve()) for p in paths]), encoding='utf-8')
     result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
