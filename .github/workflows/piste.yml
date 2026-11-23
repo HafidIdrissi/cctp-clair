@@ -1,0 +1,40 @@
+name: Tester PISTE sur Mac
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  configuration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Vérifier la présence des deux secrets du dépôt
+        env:
+          HAS_ID: ${{ secrets.PISTE_SANDBOX_CLIENT_ID != '' }}
+          HAS_SECRET: ${{ secrets.PISTE_SANDBOX_CLIENT_SECRET != '' }}
+        run: |
+          if [[ "$HAS_ID" != true || "$HAS_SECRET" != true ]]; then
+            echo "::error::Ajoutez PISTE_SANDBOX_CLIENT_ID et PISTE_SANDBOX_CLIENT_SECRET dans Settings → Secrets and variables → Actions, puis relancez le test."
+            exit 1
+          fi
+  article:
+    needs: configuration
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Installer n8n et les dépendances du relais
+        run: |
+          npm install -g n8n@2.48.8 --no-audit --no-fund
+          python -m pip install -r requirements.txt
+      - name: Demander un article à Légifrance via n8n
+        env:
+          PISTE_SANDBOX_CLIENT_ID: ${{ secrets.PISTE_SANDBOX_CLIENT_ID }}
+          PISTE_SANDBOX_CLIENT_SECRET: ${{ secrets.PISTE_SANDBOX_CLIENT_SECRET }}
+        run: python .github/scripts/test_piste.py

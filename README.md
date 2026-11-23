@@ -103,6 +103,19 @@ Pour les prochaines mises à jour de cet index, réutilisez la commande complèt
 
 ### Configurer PISTE sur mon PC
 
+**Vous avez téléchargé le ZIP pour tester sur votre Mac ou votre PC ?** Saisissez une seule fois votre **Client ID** et votre **Client Secret** PISTE dans votre **n8n local**. Après confirmation du message **« Article reçu »**, CCTP Clair utilise ce relais pour les prochaines analyses tant que n8n est ouvert. Les appels utilisent le quota de votre application PISTE. [Voir où cliquer dans n8n](#saisir-les-clés-piste-dans-n8n)
+
+**Et les secrets GitHub ?** Ajouter des clés dans **GitHub → Settings → Secrets and variables → Actions** ne configure pas le ZIP sur votre ordinateur. Ces secrets servent aux tests automatisés qui les demandent explicitement sur GitHub. Vous pouvez utiliser le SLM et PISTE en local sans compte GitHub. [Documentation des secrets GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)
+
+<details>
+<summary><strong>Tester mes clés sur un Mac hébergé par GitHub</strong></summary>
+
+1. Utilisez un dépôt que vous administrez. Si vous êtes testeur externe, cliquez sur **Fork** pour créer votre propre copie et activez **Actions** dans cette copie si GitHub vous le propose.
+2. Dans **Settings → Secrets and variables → Actions → New repository secret**, ajoutez **deux secrets distincts**. Nommez le premier `PISTE_SANDBOX_CLIENT_ID` et collez le **Client ID** de votre application sandbox PISTE. Nommez le second `PISTE_SANDBOX_CLIENT_SECRET` et collez le **Client Secret**.
+3. Ouvrez **Actions → Tester PISTE sur Mac → Run workflow**, choisissez **main** et confirmez. Le test lance n8n sur un Mac temporaire et demande un article à Légifrance avec votre quota. Le message **« Article reçu via n8n sur Mac »** dans la dernière étape confirme la connexion. Pour activer PISTE sur votre ordinateur, suivez ensuite les instructions de configuration locale ci-dessous.
+
+</details>
+
 **Sur le portail PISTE**
 
 1. Créez un compte, activez-le puis connectez-vous. PISTE crée automatiquement votre application de test, appelée **sandbox**. [Créer mon compte PISTE](https://piste.gouv.fr/registration)
