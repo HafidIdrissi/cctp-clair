@@ -61,14 +61,24 @@ def verify(page):
     elif case.startswith('tain'):
         start, end = (1,15) if case=='tain-1' else (16,27)
         job = upload(page, split_pdf(first('*Tain*'), start,end), 'Tain-l’Hermitage')
-    elif case == 'modele':
+    elif case in ('modele','export'):
         data=json.dumps({'model':'qwen3:4b','stream':False}).encode()
         with urlopen(Request('http://127.0.0.1:11434/api/pull', data=data),timeout=1200) as reply:
             assert json.load(reply)['status']=='success'
         page.reload()
         page.locator('#form summary').click()
         page.locator('#model').select_option('qwen3:4b',timeout=30000)
-        job = upload(page, split_pdf(first('*Rennes*B_avec*'),1,1), 'Rennes')
+        if case=='export':
+            # Small native-text fixture only in the ephemeral test directory.
+            path=temp/'Essai-export.pdf'
+            with pymupdf.open() as pdf:
+                sheet=pdf.new_page()
+                sheet.insert_text((45,65),'Cheminement pieton sur voirie publique, a Rennes.')
+                sheet.insert_text((45,95),'Largeur libre du cheminement pieton projetee : 1,10 m.')
+                pdf.save(path)
+        else:
+            path=split_pdf(first('*Rennes*B_avec*'),1,1)
+        job = upload(page, path, 'Rennes')
     else:
         raise ValueError(case)
     start = time.monotonic()
@@ -91,7 +101,7 @@ def verify(page):
     with page.expect_popup() as source:
         page.get_by_text('Inspecter le CCTP original',exact=True).click()
     doc=source.value
-    assert doc.locator('.page img').count()>0
+    doc.locator('.page img').first.wait_for()
     if case in ('rennes-b','n8n'):
         for selector,value in [('.spot:not(.ok)','1,10'),('.spot.ok','1,00')]:
             target=doc.locator(selector).filter(has=doc.locator('.detail')).first
@@ -112,7 +122,7 @@ def verify(page):
             offline=page.context.new_page()
             offline.goto(dest.as_uri())
             assert offline.locator('.page img').first.evaluate('img=>img.complete && img.naturalWidth>0')
-        if suffix=='json' and case=='modele':
+        if suffix=='json' and case in ('modele','export'):
             req=list(root.glob('local/**/'+job+'/request.json'))
             assert req and json.loads(req[0].read_text())['metadata']['comparison_model']=='qwen3:4b'
     print('Parcours terminé',case,flush=True)
@@ -121,5 +131,5 @@ def verify(page):
 if __name__=='__main__':
     with sync_playwright() as pw:
         browser=pw.chromium.launch(channel='chrome')
-        try: verify(browser.new_page(accept_downloads=True))
+        try: verify(browser.new_context(accept_downloads=True).new_page())
         finally: browser.close()

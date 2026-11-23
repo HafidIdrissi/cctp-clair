@@ -1,7 +1,7 @@
 name: Parcours du ZIP public sur Mac
 on:
   push:
-    branches: [qa/mac-readme-132]
+    branches: [qa/mac-export-132]
 permissions:
   contents: read
 jobs:
@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        parcours: [rennes-b, n8n, dila-voirie, dila-complet, rennes-a, nantes, tain-1, tain-2, modele]
+        parcours: [export]
     runs-on: macos-15
     timeout-minutes: 340
     env:
